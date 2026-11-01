@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
 	BookmarkSimpleIcon,
 	CaretRightIcon,
@@ -13,7 +13,7 @@ import { isValid } from 'date-fns';
 import { Link, useLocation, useNavigate } from 'react-router';
 import {
 	Button,
-	CloudflareLogo,
+
 	InputGroup,
 	Sidebar,
 	cn,
@@ -22,6 +22,7 @@ import {
 import { useAuth } from '@/contexts/auth-context';
 import { useApps, useFavoriteApps, useRecentApps } from '@/hooks/use-apps';
 import { AppActionsDropdown } from '@/components/shared/AppActionsDropdown';
+import { MasidyLogo } from '@/components/icons/MasidyLogo';
 import { OrangeButton } from '@/components/shared/OrangeButton';
 import { AuthButton } from '@/components/auth/auth-button';
 import { useUsageLimitsBadgeState } from '@/components/usage-limits-badge';
@@ -125,7 +126,7 @@ function AppMenuItem({
 						<span className="shrink-0">
 							{getVisibilityIcon(app.visibility)}
 						</span>
-						<span className="shrink-0">•</span>
+						<span className="shrink-0">â€¢</span>
 						<span className="truncate">{formatTimestamp()}</span>
 					</span>
 				</span>
@@ -262,10 +263,7 @@ export function AppSidebar() {
 			>
 				{isCollapsed ? (
 					<div className="relative flex size-9 items-center justify-center">
-						<CloudflareLogo
-							variant="glyph"
-							className="size-7 shrink-0 transition-opacity group-hover/sidebar:opacity-0 group-focus-within/sidebar:opacity-0"
-						/>
+						<MasidyLogo className="size-7 shrink-0 transition-opacity group-hover/sidebar:opacity-0 group-focus-within/sidebar:opacity-0" />
 						<Sidebar.Trigger
 							aria-label="Open sidebar"
 							className="absolute inset-0 flex size-9 items-center justify-center opacity-0 transition-opacity group-hover/sidebar:opacity-100 group-focus-within/sidebar:opacity-100"
@@ -277,12 +275,9 @@ export function AppSidebar() {
 							to="/"
 							className="flex min-w-0 flex-1 items-center gap-2.5 text-kumo-strong"
 						>
-							<CloudflareLogo
-								variant="glyph"
-								className="size-7 shrink-0"
-							/>
+							<MasidyLogo className="size-7 shrink-0" />
 							<span className="min-w-0 flex-1 truncate text-base font-black font-funky-mono uppercase tracking-wide">
-								Build
+								Masidy
 							</span>
 						</Link>
 						<Sidebar.Trigger
@@ -299,8 +294,8 @@ export function AppSidebar() {
 						{pathname !== '/' && (
 							<OrangeButton
 								shape="square"
-								aria-label="New build"
-								title="New build"
+								aria-label="New app"
+								title="New app"
 								onClick={() => navigate('/')}
 								className="size-8!"
 								icon={
@@ -341,13 +336,13 @@ export function AppSidebar() {
 											weight="bold"
 										/>
 									}
-									title="New build"
+									title="New app"
 									onClick={() => {
 										navigate('/');
 									}}
 									className="h-8! w-full justify-start text-sm"
 								>
-									New build
+									New app
 								</OrangeButton>
 							)}
 
@@ -599,11 +594,7 @@ export function AppSidebar() {
 									: 'h-8! w-full justify-start gap-2 text-sm',
 							)}
 							icon={
-								<CloudflareLogo
-									variant="glyph"
-									color="white"
-									className="size-6 shrink-0"
-								/>
+								<MasidyLogo className="size-6 shrink-0" />
 							}
 						>
 							{!isCollapsed ? (

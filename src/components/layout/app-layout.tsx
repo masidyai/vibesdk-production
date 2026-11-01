@@ -57,7 +57,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 			mobileBreakpoint={768}
 			// peekable
 			onOpenChange={persistSidebarState}
-			className="vibesdk-sidebar-wrapper"
+			className="masidy-sidebar-wrapper"
 		>
 			<HeaderProvider>
 				<SidebarKeyboardShortcut />

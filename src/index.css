@@ -120,14 +120,14 @@
 	}
 }
 
-.vibesdk-sidebar-wrapper {
+.masidy-sidebar-wrapper {
 	height: 100svh;
 	--sidebar-width: 320px !important;
 	--sidebar-width-icon: 52px !important;
 }
 
 @media (max-width: 767px) {
-	.vibesdk-sidebar-wrapper {
+	.masidy-sidebar-wrapper {
 		--sidebar-width: 18rem !important;
 	}
 }
