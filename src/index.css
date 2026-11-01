@@ -50,7 +50,7 @@
 		'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 	--font-funky-mono: 'Departure Mono', var(--font-mono);
 
-	--color-brand: #ff3d00;
+	--color-brand: #7fff00;
 	--color-text: #000;
 }
 
@@ -69,8 +69,8 @@
 		--build-chat-colors-border-secondary: #eeeeee;
 		--build-chat-colors-border-tertiary: #eeeeee;
 		--build-chat-colors-danger: #950000cc;
-		--build-chat-colors-brand-primary: #f6821f;
-		--build-chat-colors-brand-light: #faae42;
+		--build-chat-colors-brand-primary: #7fff00;
+		--build-chat-colors-brand-light: #aaff00;
 		--build-chat-colors-text-inverted: #ffffff;
 		--build-chat-colors-text-primary: #0a0a0a;
 		--build-chat-colors-text-secondary: #171717;
@@ -89,8 +89,8 @@
 		--build-chat-colors-border-primary: #393939;
 		--build-chat-colors-border-secondary: #454746;
 		--build-chat-colors-border-tertiary: #454746;
-		--build-chat-colors-brand-primary: #f6821f;
-		--build-chat-colors-brand-light: #faae42;
+		--build-chat-colors-brand-primary: #7fff00;
+		--build-chat-colors-brand-light: #aaff00;
 		--build-chat-colors-text-inverted: #000000;
 		--build-chat-colors-text-primary: #ffffff;
 		--build-chat-colors-text-secondary: #cdcaca;
@@ -137,8 +137,8 @@
 	0%,
 	100% {
 		box-shadow:
-			0 0 0 0 rgba(246, 130, 31, 0.1),
-			inset 0 0 0 1px rgba(246, 130, 31, 0.16);
+			0 0 0 0 rgba(127, 255, 0, 0.10),
+			inset 0 0 0 1px rgba(127, 255, 0, 0.10);
 	}
 	50% {
 		box-shadow:
@@ -204,7 +204,7 @@
 .run-app-icons > span {
 	position: absolute;
 	display: flex;
-	color: var(--icon-color, var(--color-brand, #f6821f));
+	color: var(--icon-color, var(--color-brand, #7fff00));
 	opacity: var(--op, 0.22);
 	animation: run-app-icon-float var(--dur, 7s) ease-in-out infinite;
 	animation-delay: var(--delay, 0s);
@@ -236,14 +236,14 @@
 	position: absolute;
 	inset: 0;
 	background:
-		/* Warm brand core behind headline + prompt */
+		/* Lime brand core behind headline + prompt */
 		radial-gradient(
 			ellipse 42% 34% at 50% 28%,
-			rgba(246, 130, 31, 0.18) 0%,
-			rgba(246, 130, 31, 0.08) 32%,
+			rgba(127, 255, 0, 0.15) 0%,
+			rgba(127, 255, 0, 0.06) 32%,
 			transparent 68%
 		),
-		/* Soft cool rim so the stage reads as lit, not flat orange */
+		/* Soft cool rim so the stage reads as lit, not flat orange/lime */
 		radial-gradient(
 				ellipse 58% 46% at 50% 30%,
 				rgba(255, 255, 255, 0.06) 0%,
@@ -261,8 +261,8 @@
 	background:
 		radial-gradient(
 			ellipse 42% 34% at 50% 28%,
-			rgba(246, 130, 31, 0.14) 0%,
-			rgba(246, 130, 31, 0.05) 32%,
+			rgba(127, 255, 0, 0.11) 0%,
+			rgba(127, 255, 0, 0.04) 32%,
 			transparent 68%
 		),
 		radial-gradient(
