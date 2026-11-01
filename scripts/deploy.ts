@@ -2063,6 +2063,15 @@ class CloudflareDeploymentManager {
         runBestEffort('db:generate', 'bun run db:generate');
         runBestEffort('db:migrate:local', 'bun run db:migrate:local');
 
+        // One-time guard: migration was previously applied under the old filename
+        // '0006_puzzling_bloodstrike.sql' before being renamed to '0008_...'.
+        // If the viewer_hash column already exists, insert the new filename into
+        // d1_migrations so wrangler treats it as already applied and skips it.
+        runBestEffort(
+            'mark-0008-if-column-exists',
+            wrangler d1 execute vibesdk-db --remote --command "INSERT OR IGNORE INTO d1_migrations (name, applied_at) SELECT '0008_puzzling_bloodstrike.sql', datetime('now') WHERE NOT EXISTS (SELECT 1 FROM d1_migrations WHERE name = '0008_puzzling_bloodstrike.sql') AND EXISTS (SELECT 1 FROM pragma_table_info('app_views') WHERE name = 'viewer_hash')"
+        );
+
         // Remote migrations are required: deploying a Worker against a database
         // missing schema changes causes runtime SQLITE_ERRORs (e.g. "table users
         // has no column named ..."). Fail the deploy if they cannot be applied.
