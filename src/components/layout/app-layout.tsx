@@ -3,7 +3,7 @@ import { Outlet } from 'react-router';
 import { SidebarProvider, useSidebar } from '@cloudflare/kumo';
 import { AppSidebar } from './app-sidebar';
 import { GlobalHeader } from './global-header';
-import { HeaderProvider } from './header-context';
+import { HeaderProvider } from './header-provider';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;

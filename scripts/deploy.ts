@@ -16,7 +16,7 @@
 import { execSync } from 'child_process';
 import { randomBytes } from 'crypto';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { parse, modify, applyEdits } from 'jsonc-parser';
 import Cloudflare from 'cloudflare';
@@ -1755,7 +1755,8 @@ class CloudflareDeploymentManager {
 		);
 
 		// Map of environment variables to include in production secrets
-		const secretVars = [
+		const configuredVars = this.config.vars ?? {};
+		const allSecretVars = [
 			'CLOUDFLARE_API_TOKEN',
 			'CLOUDFLARE_ACCOUNT_ID',
 			'TEMPLATES_REPOSITORY',
@@ -1784,6 +1785,17 @@ class CloudflareDeploymentManager {
 			'ENVIRONMENT',
 			'PLATFORM_MODEL_PROVIDERS',
 		];
+		const configuredSecretConflicts = allSecretVars.filter((varName) =>
+			Object.hasOwn(configuredVars, varName),
+		);
+		const secretVars = allSecretVars.filter(
+			(varName) => !Object.hasOwn(configuredVars, varName),
+		);
+		if (configuredSecretConflicts.length > 0) {
+			console.log(
+				`ℹ️  Keeping Wrangler vars out of Worker secrets: ${configuredSecretConflicts.join(', ')}`,
+			);
+		}
 
 		const generatedJwtSecret = process.env.JWT_SECRET ? undefined : randomBytes(64).toString('base64url');
 		if (generatedJwtSecret) {
@@ -2240,7 +2252,7 @@ class CloudflareDeploymentManager {
 }
 
 // Main execution
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && __filename === resolve(process.argv[1])) {
 	const deployer = new CloudflareDeploymentManager();
 	deployer.deploy().catch((error) => {
 		console.error('Unexpected error:', error);

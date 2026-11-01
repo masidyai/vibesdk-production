@@ -1,93 +1,79 @@
-import {
-	createContext,
-	useContext,
-	useLayoutEffect,
-	useRef,
-	useSyncExternalStore,
-	type ReactNode,
+﻿import {
+createContext,
+useContext,
+useLayoutEffect,
+useRef,
+useSyncExternalStore,
 } from 'react';
 
 export type HeaderContent = {
-	leading?: ReactNode;
-	trailing?: ReactNode;
+leading?: import('react').ReactNode;
+trailing?: import('react').ReactNode;
 };
 
-type HeaderStore = {
-	getSnapshot: () => HeaderContent | null;
-	setContent: (content: HeaderContent | null) => void;
-	subscribe: (listener: () => void) => () => void;
+export type HeaderStore = {
+getSnapshot: () => HeaderContent | null;
+setContent: (content: HeaderContent | null) => void;
+subscribe: (listener: () => void) => () => void;
 };
 
-function createHeaderStore(): HeaderStore {
-	let content: HeaderContent | null = null;
-	const listeners = new Set<() => void>();
+export function createHeaderStore(): HeaderStore {
+let content: HeaderContent | null = null;
+const listeners = new Set<() => void>();
 
-	return {
-		getSnapshot: () => content,
-		setContent: (next) => {
-			if (Object.is(content, next)) return;
-			content = next;
-			listeners.forEach((listener) => listener());
-		},
-		subscribe: (listener) => {
-			listeners.add(listener);
-			return () => {
-				listeners.delete(listener);
-			};
-		},
-	};
+return {
+getSnapshot: () => content,
+setContent: (next) => {
+if (Object.is(content, next)) return;
+content = next;
+listeners.forEach((listener) => listener());
+},
+subscribe: (listener) => {
+listeners.add(listener);
+return () => {
+listeners.delete(listener);
+};
+},
+};
 }
 
-const HeaderStoreContext = createContext<HeaderStore | null>(null);
-
-export function HeaderProvider({ children }: { children: ReactNode }) {
-	const storeRef = useRef<HeaderStore | null>(null);
-	if (!storeRef.current) {
-		storeRef.current = createHeaderStore();
-	}
-
-	return (
-		<HeaderStoreContext.Provider value={storeRef.current}>
-			{children}
-		</HeaderStoreContext.Provider>
-	);
-}
+export const HeaderStoreContext = createContext<HeaderStore | null>(null);
 
 function useHeaderStore() {
-	const store = useContext(HeaderStoreContext);
-	if (!store) {
-		throw new Error('useHeaderStore must be used within HeaderProvider');
-	}
-	return store;
+const store = useContext(HeaderStoreContext);
+if (!store) {
+throw new Error('useHeaderStore must be used within HeaderProvider');
+}
+return store;
 }
 
 export function useHeaderContent() {
-	const store = useHeaderStore();
-	const content = useSyncExternalStore(
-		store.subscribe,
-		store.getSnapshot,
-		store.getSnapshot,
-	);
+const store = useHeaderStore();
+const content = useSyncExternalStore(
+store.subscribe,
+store.getSnapshot,
+store.getSnapshot,
+);
 
-	return {
-		content,
-		setContent: store.setContent,
-	};
+return {
+content,
+setContent: store.setContent,
+};
 }
 
 /** Registers page-specific header slots for the lifetime of the caller. */
 export function usePageHeader(content: HeaderContent | null) {
-	const store = useHeaderStore();
-	const contentRef = useRef(content);
-	contentRef.current = content;
+const store = useHeaderStore();
+const contentRef = useRef(content);
+contentRef.current = content;
 
-	useLayoutEffect(() => {
-		store.setContent(contentRef.current);
-	});
+useLayoutEffect(() => {
+store.setContent(contentRef.current);
+});
 
-	useLayoutEffect(() => {
-		return () => {
-			store.setContent(null);
-		};
-	}, [store]);
+useLayoutEffect(() => {
+return () => {
+store.setContent(null);
+};
+}, [store]);
 }
