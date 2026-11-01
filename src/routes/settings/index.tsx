@@ -249,7 +249,7 @@ export default function SettingsPage() {
 
 	return (
 		<div className="relative">
-			<title>Settings - Build</title>
+			<title>Settings - Masidy</title>
 			<main className="container mx-auto px-4 py-16 max-w-4xl pb-48">
 				<div className="grid gap-8">
 					{/* Page Header */}
@@ -279,7 +279,7 @@ export default function SettingsPage() {
 								<div className="flex items-start justify-between gap-4">
 									<div className="grid gap-1.5">
 										<h4 className="text-sm font-medium text-kumo-default">
-											VibeSDK API keys
+											Masidy API keys
 										</h4>
 										<p className="text-sm text-kumo-subtle">
 											Use these keys to authenticate
@@ -354,7 +354,7 @@ export default function SettingsPage() {
 															Treat this like a
 															password. Anyone
 															with this key can
-															act as your VibeSDK
+															act as your Masidy
 															account.
 														</p>
 													</div>
@@ -432,7 +432,7 @@ export default function SettingsPage() {
 															SDK usage
 														</p>
 														<code className="text-xs text-slate-600 dark:text-slate-400 block font-mono text-[0.9em]">
-															VIBESDK_API_KEY=
+															MASIDY_API_KEY=
 															{
 																createdKey.keyPreview
 															}
@@ -493,7 +493,7 @@ export default function SettingsPage() {
 												</p>
 												<p className="text-sm text-kumo-subtle">
 													Create an API key to use the
-													VibeSDK SDK from your own
+													Masidy SDK from your own
 													apps.
 												</p>
 											</div>
