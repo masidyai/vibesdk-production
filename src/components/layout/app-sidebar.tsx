@@ -263,7 +263,7 @@ export function AppSidebar() {
 			>
 				{isCollapsed ? (
 					<div className="relative flex size-9 items-center justify-center">
-						<MasidyLogo className="size-10 shrink-0 transition-opacity group-hover/sidebar:opacity-0 group-focus-within/sidebar:opacity-0" />
+						<MasidyLogo className="size-7 shrink-0 transition-opacity group-hover/sidebar:opacity-0 group-focus-within/sidebar:opacity-0" />
 						<Sidebar.Trigger
 							aria-label="Open sidebar"
 							className="absolute inset-0 flex size-9 items-center justify-center opacity-0 transition-opacity group-hover/sidebar:opacity-100 group-focus-within/sidebar:opacity-100"
@@ -275,7 +275,7 @@ export function AppSidebar() {
 							to="/"
 							className="flex min-w-0 flex-1 items-center gap-2.5 text-kumo-strong"
 						>
-							<MasidyLogo className="size-10 shrink-0" />
+							<MasidyLogo className="size-7 shrink-0" />
 							<span className="min-w-0 flex-1 truncate text-base font-black font-funky-mono uppercase tracking-wide">
 								Masidy
 							</span>
@@ -594,7 +594,7 @@ export function AppSidebar() {
 									: 'h-8! w-full justify-start gap-2 text-sm',
 							)}
 							icon={
-								<MasidyLogo className="size-9 shrink-0" />
+								<MasidyLogo className="size-6 shrink-0" />
 							}
 						>
 							{!isCollapsed ? (
