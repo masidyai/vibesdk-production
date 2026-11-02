@@ -224,4 +224,13 @@ export class ApiKeyService extends BaseService {
             return 0;
         }
     }
+
+    /** Revoke all API keys for a user (used during account deletion). */
+    async revokeAllUserApiKeys(userId: string): Promise<void> {
+        await this.database
+            .update(schema.apiKeys)
+            .set({ isActive: false })
+            .where(eq(schema.apiKeys.userId, userId));
+    }
+
 }

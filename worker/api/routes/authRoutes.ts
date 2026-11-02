@@ -26,6 +26,10 @@ export function setupAuthRoutes(app: Hono<AppEnv>): void {
     authRouter.put('/profile', setAuthLevel(AuthConfig.authenticated), adaptController(AuthController, AuthController.updateProfile));
     authRouter.post('/logout', setAuthLevel(AuthConfig.authenticated), adaptController(AuthController, AuthController.logout));
 
+    // Account management routes
+    authRouter.delete('/account', setAuthLevel(AuthConfig.authenticated), adaptController(AuthController, AuthController.deleteAccount));
+    authRouter.post('/password/change', setAuthLevel(AuthConfig.authenticated), adaptController(AuthController, AuthController.changePassword));
+
     // Session management routes
     authRouter.get('/sessions', setAuthLevel(AuthConfig.authenticated), adaptController(AuthController, AuthController.getActiveSessions));
     authRouter.delete('/sessions/:sessionId', setAuthLevel(AuthConfig.authenticated), adaptController(AuthController, AuthController.revokeSession));

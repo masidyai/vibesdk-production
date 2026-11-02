@@ -278,4 +278,21 @@ export class UserService extends BaseService {
         return { totalApps, appsThisMonth };
     }
 
+
+    /** Soft-delete a user account. */
+    async deleteUser(userId: string): Promise<void> {
+        await this.database
+            .update(schema.users)
+            .set({ isActive: false, deletedAt: new Date(), updatedAt: new Date() })
+            .where(eq(schema.users.id, userId));
+    }
+
+    /** Update a user password hash. */
+    async updatePasswordHash(userId: string, newHash: string): Promise<void> {
+        await this.database
+            .update(schema.users)
+            .set({ passwordHash: newHash, passwordChangedAt: new Date(), updatedAt: new Date() })
+            .where(eq(schema.users.id, userId));
+    }
+
 }

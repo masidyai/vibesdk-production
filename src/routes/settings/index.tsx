@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import {
 	useMutation,
 	useQuery,
@@ -84,7 +84,8 @@ async function fetchApiKeys(): Promise<ApiKeysData> {
 }
 
 export default function SettingsPage() {
-	const { user } = useAuth();
+	const { user, logout } = useAuth();
+	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [searchParams, setSearchParams] = useSearchParams();
 
@@ -139,7 +140,14 @@ export default function SettingsPage() {
 	const apiKeys = apiKeysQuery.data?.keys ?? [];
 
 	const handleDeleteAccount = async () => {
-		toast.error('Account deletion is not yet implemented');
+		try {
+			await apiClient.deleteAccount();
+			await logout();
+			navigate('/');
+			toast.success('Account deleted successfully');
+		} catch (_err) {
+			toast.error('Failed to delete account.');
+		}
 	};
 
 	const revokeSessionMutation = useMutation({
@@ -225,6 +233,23 @@ export default function SettingsPage() {
 	const apiKeysLoading = !!user && apiKeysQuery.isLoading;
 	const activeSessionsLoading = !!user && activeSessionsQuery.isLoading;
 
+	const handleChangePassword = async () => {
+		if (!pwNew || !pwCurrent) return;
+		if (pwNew !== pwConfirm) { toast.error('Passwords do not match'); return; }
+		if (pwNew.length < 8) { toast.error('Password must be at least 8 characters'); return; }
+		setPwLoading(true);
+		try {
+			const res = await apiClient.changePassword({ currentPassword: pwCurrent, newPassword: pwNew, confirmPassword: pwConfirm });
+			if (res.success) {
+				toast.success('Password changed successfully');
+				setPwCurrent(''); setPwNew(''); setPwConfirm('');
+			} else {
+				toast.error(res.error?.message ?? 'Failed to change password');
+			}
+		} catch (_e) { toast.error('Failed to change password'); }
+		finally { setPwLoading(false); }
+	};
+
 	const handleRevokeSession = (sessionId: string) => {
 		revokeSessionMutation.mutate(sessionId);
 	};
@@ -262,8 +287,42 @@ export default function SettingsPage() {
 						</p>
 					</div>
 
-					{/* Cloudflare Account & Gateway Selection */}
-					<CloudflareAccountSelector />
+					{/* Masidy Plan */}
+					<LayerCard>
+						<LayerCard.Secondary className="font-funky-mono tracking-tighter">
+							Plan &amp; Usage
+						</LayerCard.Secondary>
+						<LayerCard.Primary>
+							<div className="grid gap-4">
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-kumo-default">Free plan</p>
+										<p className="text-sm text-kumo-subtle">Masidy handles all AI and infrastructure — no Cloudflare account needed.</p>
+									</div>
+									<span className="rounded-full bg-green-100 dark:bg-green-950 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-300">Active</span>
+								</div>
+							</div>
+						</LayerCard.Primary>
+					</LayerCard>
+
+					{/* Advanced: own Cloudflare account */}
+					<details className="group">
+						<summary className="cursor-pointer list-none">
+							<LayerCard className="hover:ring-kumo-brand/30 transition-shadow">
+								<LayerCard.Secondary className="font-funky-mono tracking-tighter flex items-center justify-between">
+									<span>Advanced — Connect your own Cloudflare account</span>
+									<span className="text-xs font-normal text-kumo-subtle group-open:hidden">Expand</span>
+									<span className="text-xs font-normal text-kumo-subtle hidden group-open:inline">Collapse</span>
+								</LayerCard.Secondary>
+								<LayerCard.Primary>
+									<p className="text-sm text-kumo-subtle">For self-hosted deployments or power users who want to use their own Cloudflare AI Gateway and credits.</p>
+								</LayerCard.Primary>
+							</LayerCard>
+						</summary>
+						<div className="mt-2">
+							<CloudflareAccountSelector />
+						</div>
+					</details>
 
 					<LayerCard id="api-keys">
 						<LayerCard.Secondary className="font-funky-mono tracking-tighter">
@@ -618,7 +677,23 @@ export default function SettingsPage() {
 						</LayerCard.Secondary>
 						<LayerCard.Primary>
 							<div className="grid gap-6">
-								<ConnectedAccounts />
+								{user?.provider === 'email' && (
+								<div className="grid gap-4">
+									<h4 className="text-sm font-medium text-kumo-default">Change password</h4>
+									<div className="grid gap-3">
+										<Input label="Current password" type="password" value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} autoComplete="current-password" />
+										<Input label="New password" type="password" value={pwNew} onChange={e => setPwNew(e.target.value)} autoComplete="new-password" />
+										<Input label="Confirm new password" type="password" value={pwConfirm} onChange={e => setPwConfirm(e.target.value)} autoComplete="new-password" />
+										<div>
+											<Button variant="primary" size="sm" onClick={handleChangePassword} loading={pwLoading} disabled={!pwCurrent || !pwNew || !pwConfirm || pwLoading}>
+												Change password
+											</Button>
+										</div>
+									</div>
+									<Separator />
+								</div>
+							)}
+							<ConnectedAccounts />
 
 								<Separator />
 
