@@ -36,6 +36,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useUserStats, useUserActivity } from '@/hooks/use-stats';
 import { useUpdateProfile } from '@/hooks/use-profile';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useApps } from '@/hooks/use-apps';
 
 const STATS = [
@@ -95,6 +96,7 @@ export default function Profile() {
 	const { apps: recentApps, loading: appsLoading } = useApps();
 	const { mutateAsync: saveProfile, isPending: isSaving } =
 		useUpdateProfile();
+	const { copied: copiedUrl, copy: copyUrl } = useCopyToClipboard();
 
 	const achievements = stats?.achievements || [];
 
@@ -146,7 +148,7 @@ export default function Profile() {
 		<div className="min-h-screen">
 			<title>
 				{user?.displayName
-					? `${user.displayName} - Profile - Build`
+					? `${user.displayName} - Profile - Masidy`
 					: 'Profile - Masidy'}
 			</title>
 			<main className="container mx-auto max-w-4xl px-4 py-12 pb-24">
@@ -192,6 +194,20 @@ export default function Profile() {
 						<Text variant="secondary" size="sm">
 							{user?.email}
 						</Text>
+					{user?.username && (
+						<div className="flex items-center gap-2 mt-1">
+							<Globe className="size-3.5 text-kumo-subtle shrink-0" />
+							<span className="text-sm text-kumo-subtle font-mono">masidy.dev/u/{user.username}</span>
+							<button
+								type="button"
+								className="text-xs text-kumo-subtle hover:text-kumo-default transition-colors"
+								onClick={() => copyUrl(`https://masidy.dev/u/${user.username}`)}
+								aria-label="Copy profile URL"
+							>
+								{copiedUrl ? 'Copied!' : 'Copy'}
+							</button>
+						</div>
+					)}
 						{user?.bio && !isEditing && (
 							<p className="mt-2 max-w-xl text-sm text-kumo-default">
 								{user.bio}
