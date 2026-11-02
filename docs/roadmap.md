@@ -64,28 +64,27 @@ No Cloudflare account needed by end users. Everything runs on Masidy's paid Clou
 
 ## Phase 2 — Stable Deployments + Subdomains
 **Goal:** Apps deployed by users live at a stable `app-name.masidy.dev` URL, not just ephemeral previews.
-**Status:** ⏳ Pending
-**Branch:** `feat/phase-2-stable-deployments`
+**Status:** ✅ Complete
 
 ### Tasks
-- [ ] 2.1 Enable `ENABLE_USER_ACCOUNT_DEPLOY` flag
+- [x] 2.1 Enable `ENABLE_USER_ACCOUNT_DEPLOY` flag
   - Currently off. Turning on allows `target: 'platform'` deploys using Masidy credentials
   - Workers for Platforms dispatch namespace: `vibesdk-default-namespace` (already configured)
   - File: `worker/app.ts`, `wrangler.jsonc` vars
 
-- [ ] 2.2 Wildcard subdomain routing
+- [x] 2.2 Wildcard subdomain routing
   - Route `*.masidy.dev` → main Worker → read subdomain → resolve to correct user app
   - Advanced Certificate Manager already covers wildcard SSL ✅
   - Need: subdomain → app_id mapping in D1, routing middleware in worker
   - Files: `worker/index.ts`, `worker/app.ts`, new `worker/api/middleware/subdomain.ts`
 
-- [ ] 2.3 App slug/name system
+- [x] 2.3 App slug/name system
   - Each app gets a unique slug (e.g. `todo-app-123`) used as subdomain
   - Auto-generated from app title, user can rename
   - Add `slug` column to `apps` D1 table → new migration
   - Files: `worker/database/schema.ts`, `src/routes/app/index.tsx`
 
-- [ ] 2.4 "Publish" button in chat
+- [x] 2.4 "Publish" button in chat
   - Currently deploy is a preview. Add explicit "Publish to masidy.dev" action
   - On publish: bundles current files, deploys to dispatch namespace, sets stable URL
   - Files: `src/routes/chat/chat.tsx`, `worker/agents/think/`

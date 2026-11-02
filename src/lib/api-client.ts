@@ -547,6 +547,17 @@ class ApiClient {
 	}
 
 	// ===============================
+
+	/** Publish an app - assigns subdomain URL. */
+	async publishApp(appId: string): Promise<ApiResponse<{ slug: string; publishedUrl: string; message: string }>> {
+		return this.request(`/api/apps/${appId}/publish`, { method: 'POST' });
+	}
+
+	/** Unpublish an app - makes it private again. */
+	async unpublishApp(appId: string): Promise<ApiResponse<{ message: string }>> {
+		return this.request(`/api/apps/${appId}/publish`, { method: 'DELETE' });
+	}
+
 	// App View API Methods
 	// ===============================
 
@@ -1259,6 +1270,15 @@ class ApiClient {
 	/**
 	 * Get current user profile
 	 */
+
+	async deleteAccount(): Promise<ApiResponse<{ message: string }>> {
+		return this.request<{ message: string }>('/api/auth/account', { method: 'DELETE' });
+	}
+
+	async changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }): Promise<ApiResponse<{ message: string }>> {
+		return this.request<{ message: string }>('/api/auth/password/change', { method: 'POST', body: JSON.stringify(data) });
+	}
+
 	async getProfile(noToast: boolean = false): Promise<ApiResponse<ProfileResponseData>> {
 		return this.request<ProfileResponseData>('/api/auth/profile', undefined, noToast);
 	}

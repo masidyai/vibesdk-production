@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { handleSubdomainRequest } from './middleware/subdomain-router';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import { getCORSConfig, getSecureHeadersConfig } from './config/security';
@@ -16,6 +17,20 @@ export function createApp(env: Env): Hono<AppEnv> {
 
     // Observability: Sentry error reporting & context
     // initHonoSentry(app);
+
+    // Subdomain routing: {slug}.masidy.dev -> dispatch namespace
+    app.use('*', async (c, next) => {
+        const host = c.req.header('host') ?? '';
+        const customDomain = env.CUSTOM_DOMAIN ?? 'masidy.dev';
+        // Match {slug}.masidy.dev but not masidy.dev itself
+        const subdomainMatch = host.match(new RegExp('^([a-z0-9-]+)\\.' + customDomain.replace('.', '\\.') + '$'));
+        if (subdomainMatch) {
+            const slug = subdomainMatch[1];
+            const handled = await handleSubdomainRequest(c.req.raw, env, slug);
+            if (handled) return handled;
+        }
+        return next();
+    });
 
     // Apply global security middlewares (skip for WebSocket upgrades)
     app.use('*', async (c, next) => {

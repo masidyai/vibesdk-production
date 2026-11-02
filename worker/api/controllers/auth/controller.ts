@@ -9,9 +9,7 @@ import { ApiKeyService } from '../../../database/services/ApiKeyService';
 import { generateApiKey, sha256Hash } from '../../../utils/cryptoUtils';
 import { PasswordService } from '../../../utils/passwordService';
 import { 
-    loginSchema, 
-    registerSchema, 
-    oauthProviderSchema
+    loginSchema, registerSchema, oauthProviderSchema, changePasswordSchema
 } from './authSchemas';
 import { SecurityError } from 'shared/types/errors';
 import {
@@ -869,6 +867,8 @@ export class AuthController extends BaseController {
      * always succeeds even if gateway scopes or provisioning are unavailable.
      */
     /**
+
+    /**
      * Change password for email-authenticated users.
      * POST /api/auth/password/change
      */
@@ -878,33 +878,27 @@ export class AuthController extends BaseController {
             if (!user) {
                 return AuthController.createErrorResponse('Unauthorized', 401);
             }
-            if (!user.passwordHash) {
+            // Fetch full user to access passwordHash (not on AuthUser session type)
+            const userService = new UserService(env);
+            const fullUser = await userService.findUser({ id: user.id });
+            if (!fullUser?.passwordHash) {
                 return AuthController.createErrorResponse('Password change is not available for OAuth-only accounts', 400);
             }
-
             const bodyResult = await AuthController.parseJsonBody<unknown>(request);
             if (!bodyResult.success) {
                 return bodyResult.response!;
             }
-
             const parsed = changePasswordSchema.safeParse(bodyResult.data);
             if (!parsed.success) {
-                return AuthController.createErrorResponse(
-                    parsed.error.errors[0]?.message ?? 'Invalid input',
-                    400
-                );
+                return AuthController.createErrorResponse(parsed.error.issues[0]?.message ?? 'Invalid input', 400);
             }
-
             const passwordService = new PasswordService();
-            const valid = await passwordService.verify(parsed.data.currentPassword, user.passwordHash);
+            const valid = await passwordService.verify(parsed.data.currentPassword, fullUser.passwordHash);
             if (!valid) {
                 return AuthController.createErrorResponse('Current password is incorrect', 400);
             }
-
             const newHash = await passwordService.hash(parsed.data.newPassword);
-            const userService = new UserService(env);
             await userService.updatePasswordHash(user.id, newHash);
-
             AuthController.logger.info('Password changed', { userId: user.id });
             return AuthController.createSuccessResponse({ message: 'Password changed successfully' });
         } catch (error) {
@@ -913,7 +907,7 @@ export class AuthController extends BaseController {
     }
 
     /**
-     * Delete the current user's account and all associated data.
+     * Delete current user account.
      * DELETE /api/auth/account
      */
     static async deleteAccount(_request: Request, env: Env, _ctx: ExecutionContext, routeContext: RouteContext): Promise<Response> {
@@ -922,22 +916,15 @@ export class AuthController extends BaseController {
             if (!user) {
                 return AuthController.createErrorResponse('Unauthorized', 401);
             }
-
             const userService = new UserService(env);
             const apiKeyService = new ApiKeyService(env);
             const sessionService = new SessionService(env);
-
-            // Revoke all sessions and API keys, then soft-delete the user
             await Promise.all([
                 sessionService.revokeAllUserSessions(user.id).catch(() => null),
                 apiKeyService.revokeAllUserApiKeys(user.id).catch(() => null),
             ]);
-
-            // Mark user as deleted
             await userService.deleteUser(user.id);
-
             AuthController.logger.info('Account deleted', { userId: user.id });
-
             const response = AuthController.createSuccessResponse({ message: 'Account deleted successfully' });
             clearAuthCookies(response);
             CsrfService.clearTokenCookie(response);
@@ -946,6 +933,7 @@ export class AuthController extends BaseController {
             return AuthController.handleError(error, 'delete account');
         }
     }
+
     private static async autoConnectCloudflareGateway(
         env: Env,
         userId: string,

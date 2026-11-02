@@ -1,4 +1,5 @@
 import { AppController } from '../controllers/apps/controller';
+import { PublishController } from '../controllers/publish/controller';
 import { AppViewController } from '../controllers/appView/controller';
 import { Hono } from 'hono';
 import { AppEnv } from '../../types/appenv';
@@ -64,6 +65,12 @@ export function setupAppRoutes(app: Hono<AppEnv>): void {
 
     // Delete app - OWNER ONLY
     appRouter.delete('/:id', setAuthLevel(AuthConfig.ownerOnly), adaptController(AppController, AppController.deleteApp));
+
+    // Publish app (assign slug + make public) - OWNER ONLY
+    appRouter.post('/:appId/publish', setAuthLevel(AuthConfig.ownerOnly), adaptController(PublishController, PublishController.publishApp));
+
+    // Unpublish app - OWNER ONLY
+    appRouter.delete('/:appId/publish', setAuthLevel(AuthConfig.ownerOnly), adaptController(PublishController, PublishController.unpublishApp));
     
     // ========================================
     // GIT CLONE ROUTES

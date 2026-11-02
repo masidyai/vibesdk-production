@@ -130,6 +130,10 @@ export default function SettingsPage() {
 		ApiKeysData['keys'][number] | null
 	>(null);
 	const [revokeError, setRevokeError] = useState<string>();
+	const [pwCurrent, setPwCurrent] = useState('');
+	const [pwNew, setPwNew] = useState('');
+	const [pwConfirm, setPwConfirm] = useState('');
+	const [pwLoading, setPwLoading] = useState(false);
 	const {
 		copied: copiedCreatedKey,
 		copy: copyCreatedKey,

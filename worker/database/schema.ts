@@ -186,6 +186,10 @@ export const apps = sqliteTable('apps', {
     
     // Deployment Information
     deploymentId: text('deployment_id'), // Deployment ID (extracted from deployment URL)
+
+    // Stable public deployment
+    slug: text('slug').unique(),        // URL-safe slug: {slug}.masidy.dev
+    publishedUrl: text('published_url'), // Stable URL once published
     
     // GitHub Repository Integration
     githubRepositoryUrl: text('github_repository_url'), // GitHub repository URL
@@ -213,6 +217,7 @@ export const apps = sqliteTable('apps', {
     updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
     lastDeployedAt: integer('last_deployed_at', { mode: 'timestamp' }),
 }, (table) => ({
+    slugIdx: uniqueIndex('apps_slug_idx').on(table.slug),
     userIdx: index('apps_user_idx').on(table.userId),
     statusIdx: index('apps_status_idx').on(table.status),
     visibilityIdx: index('apps_visibility_idx').on(table.visibility),

@@ -64,6 +64,13 @@
       "when": 1784039913365,
       "tag": "0008_puzzling_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793631950102,
+      "tag": "0009_red_king_cobra",
+      "breakpoints": true
     }
   ]
 }

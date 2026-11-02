@@ -55,6 +55,8 @@ export function toPublicAppListItem(app: EnhancedAppData): PublicAppListData {
         likeCount: app.likeCount,
         userStarred: app.userStarred,
         userFavorited: app.userFavorited,
+        slug: app.slug ?? undefined,
+        publishedUrl: app.publishedUrl ?? undefined,
     };
 }
 
@@ -83,5 +85,7 @@ export function toPublicAppDetail(
         originalPrompt: app.originalPrompt,
         userId: isOwner ? app.userId : undefined,
         deploymentId: isOwner ? app.deploymentId : undefined,
+        slug: app.slug ?? undefined,
+        publishedUrl: app.publishedUrl ?? undefined,
     };
 }

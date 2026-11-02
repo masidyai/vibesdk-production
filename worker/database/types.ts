@@ -65,7 +65,7 @@ export type PublicAppListData = Pick<
     | 'likeCount'
     | 'userStarred'
     | 'userFavorited'
->;
+> & { slug?: string | null; publishedUrl?: string | null };
 
 /**
  * Safe public projection of an app for the detail endpoint. Adds the original
@@ -76,6 +76,8 @@ export type PublicAppDetailData = PublicAppListData &
     Pick<EnhancedAppData, 'originalPrompt'> & {
         userId?: string | null;
         deploymentId?: string | null;
+        slug?: string | null;
+        publishedUrl?: string | null;
     };
 
 /**

@@ -1178,4 +1178,78 @@ export class AppService extends BaseService {
     private async enrichScreenshotUrls<T extends { id: string; screenshotUrl?: string | null }>(apps: T[]): Promise<T[]> {
         return new ScreenshotSecurity(this.env).enrichUrls(apps);
     }
+
+    /**
+     * Generate a unique URL-safe slug for an app from its title.
+     * Format: {sanitized-title}-{short-id}
+     */
+    private async generateUniqueSlug(title: string, appId: string): Promise<string> {
+        const base = title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 40) || 'app';
+        const suffix = appId.slice(-6);
+        const candidate = `${base}-${suffix}`;
+
+        // Check uniqueness
+        const existing = await this.database
+            .select({ id: schema.apps.id })
+            .from(schema.apps)
+            .where(eq(schema.apps.slug, candidate))
+            .get();
+
+        if (!existing || existing.id === appId) {
+            return candidate;
+        }
+        // Fallback: use full id suffix
+        return `${base}-${appId.slice(-10)}`;
+    }
+
+    /**
+     * Publish an app: assign a slug, set publishedUrl, and make it public.
+     * Returns the stable published URL.
+     */
+    async publishApp(
+        appId: string,
+        userId: string,
+        customDomain: string = 'masidy.dev',
+    ): Promise<{ slug: string; publishedUrl: string }> {
+        const app = await this.database
+            .select()
+            .from(schema.apps)
+            .where(eq(schema.apps.id, appId))
+            .get();
+
+        if (!app) throw new Error('App not found');
+        if (app.userId !== userId) throw new Error('Unauthorized');
+
+        // Reuse existing slug if already published
+        const slug = app.slug ?? await this.generateUniqueSlug(app.title, appId);
+        const publishedUrl = `https://${slug}.${customDomain}`;
+
+        await this.database
+            .update(schema.apps)
+            .set({
+                slug,
+                publishedUrl,
+                visibility: 'public',
+                lastDeployedAt: new Date(),
+                updatedAt: new Date(),
+            })
+            .where(eq(schema.apps.id, appId));
+
+        return { slug, publishedUrl };
+    }
+
+    /** Look up an app by its slug. */
+    /** Look up an app by its slug. */
+    async getAppBySlug(slug: string): Promise<schema.App | null> {
+        const rows = await this.database
+            .select()
+            .from(schema.apps)
+            .where(eq(schema.apps.slug, slug))
+            .limit(1);
+        return rows[0] !== undefined ? (rows[0] as schema.App) : null;
+    }
 }
