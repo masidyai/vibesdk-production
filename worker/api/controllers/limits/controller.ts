@@ -8,6 +8,7 @@ import { RouteContext } from '../../types/route-context';
 import { checkUsageAndBalance, isCloudflareGatewayLimitsEnabled } from '../../../services/rate-limit';
 import { CloudflareAccountService } from '../../../services/cloudflare/CloudflareAccountService';
 import { UserService } from '../../../database/services/UserService';
+import { UsageService } from '../../../database/services/UsageService';
 import { createLogger } from '../../../logger';
 
 export class LimitsController extends BaseController {
@@ -32,10 +33,12 @@ export class LimitsController extends BaseController {
 			// Token is read from the HttpOnly cookie inside checkUsageAndBalance.
 			const accountService = new CloudflareAccountService(env);
 			const userService = new UserService(env);
-			const [usageResult, selectedGateway, aiGatewayPref] = await Promise.all([
+			const usageService = new UsageService(env);
+			const [usageResult, selectedGateway, aiGatewayPref, buildUsage] = await Promise.all([
 				checkUsageAndBalance(env, user.id, request),
 				accountService.getSelectedGatewayWithAccount(user.id),
 				userService.getAiGatewayPreference(user.id),
+				usageService.getUserUsageSummary(user.id),
 			]);
 			// A gateway is "configured" for usage purposes only when one is connected
 			// AND the user has the AI Gateway toggle enabled; otherwise platform limits
@@ -97,6 +100,14 @@ export class LimitsController extends BaseController {
 						accountName: selectedGateway.account.accountName,
 					} : {}),
 				} : null,
+				buildUsage: {
+					buildsUsed: buildUsage.buildsUsed,
+					buildsLimit: buildUsage.buildsLimit,
+					plan: buildUsage.plan,
+					periodStart: buildUsage.periodStart.toISOString(),
+					periodEnd: buildUsage.periodEnd.toISOString(),
+					withinLimits: buildUsage.withinLimits,
+				},
 			});
 			if (usageResult.refreshedCookie) {
 				response.headers.append('Set-Cookie', usageResult.refreshedCookie);

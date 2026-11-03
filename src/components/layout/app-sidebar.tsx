@@ -26,6 +26,7 @@ import { MasidyLogo } from '@/components/icons/MasidyLogo';
 import { OrangeButton } from '@/components/shared/OrangeButton';
 import { AuthButton } from '@/components/auth/auth-button';
 import { useUsageLimitsBadgeState } from '@/components/usage-limits-badge';
+import { useLimitsContext } from '@/contexts/limits-context';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { startCloudflareConnect } from '@/lib/cloudflare-connect';
 
@@ -155,6 +156,8 @@ export function AppSidebar() {
 	const { state } = useSidebar();
 	const isCollapsed = state === 'collapsed';
 	const usageLimits = useUsageLimitsBadgeState();
+	const { data: limitsData } = useLimitsContext();
+	const buildUsage = limitsData?.buildUsage;
 	// Show only when action is needed: not connected, or token without gateway.
 	// Hide when configured even if cloudflareCredits is still null.
 	const showCloudflareCta =
@@ -603,6 +606,16 @@ export function AppSidebar() {
 								</span>
 							) : null}
 						</OrangeButton>
+					)}
+					{buildUsage && !isCollapsed && (
+						<div className="flex items-center justify-between text-xs text-kumo-subtle px-1">
+							<span>Builds this month</span>
+							<span className="font-mono font-medium text-kumo-default">
+								{buildUsage.buildsLimit >= 999999
+									? `${buildUsage.buildsUsed}`
+									: `${buildUsage.buildsUsed} / ${buildUsage.buildsLimit}`}
+							</span>
+						</div>
 					)}
 					<div
 						className={cn(

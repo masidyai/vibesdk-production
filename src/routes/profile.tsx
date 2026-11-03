@@ -36,6 +36,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useUserStats, useUserActivity } from '@/hooks/use-stats';
 import { useUpdateProfile } from '@/hooks/use-profile';
+import { useLimitsContext } from '@/contexts/limits-context';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useApps } from '@/hooks/use-apps';
 
@@ -97,6 +98,8 @@ export default function Profile() {
 	const { mutateAsync: saveProfile, isPending: isSaving } =
 		useUpdateProfile();
 	const { copied: copiedUrl, copy: copyUrl } = useCopyToClipboard();
+	const { data: limitsData } = useLimitsContext();
+	const buildUsage = limitsData?.buildUsage;
 
 	const achievements = stats?.achievements || [];
 
@@ -260,6 +263,14 @@ export default function Profile() {
 
 				{/* Stats */}
 				<div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+					{buildUsage && (
+						<div className="relative overflow-hidden rounded-xl px-4 py-4 bg-kumo-base ring ring-kumo-line/70">
+							<div className="relative grid gap-1">
+								<p className="text-3xl font-semibold tabular-nums text-kumo-strong">{buildUsage.buildsLimit >= 999999 ? buildUsage.buildsUsed : `${buildUsage.buildsUsed}/${buildUsage.buildsLimit}`}</p>
+								<p className="text-sm text-kumo-subtle">Builds / month</p>
+							</div>
+						</div>
+					)}
 					{STATS.map(({ key, label, icon: Icon, iconClass }) => (
 						<div
 							key={key}

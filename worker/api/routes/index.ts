@@ -15,6 +15,7 @@ import { setupTicketRoutes } from './ticketRoutes';
 import { setupCloudflareConnectRoutes } from './cloudflareConnectRoutes';
 import { setupCloudflareAccountRoutes } from './cloudflareAccountRoutes';
 import { setupLimitsRoutes } from './limitsRoutes';
+import { setupBillingRoutes } from './billingRoutes';
 import { Hono } from "hono";
 import { AppEnv } from "../../types/appenv";
 import { setupStatusRoutes } from './statusRoutes';
@@ -79,4 +80,5 @@ export function setupRoutes(app: Hono<AppEnv>): void {
 
     // Usage limits and free tier routes
     setupLimitsRoutes(app);
+    setupBillingRoutes(app);
 }

@@ -38,6 +38,7 @@ import { apiClient } from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-keys';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { CloudflareAccountSelector } from '@/components/cloudflare-account-selector';
+import { UsageCard } from '@/components/usage-card';
 import { ConnectedAccounts } from '@/components/connected-accounts';
 import { BiohazardIcon, TrashIcon } from '@phosphor-icons/react';
 
@@ -290,24 +291,7 @@ export default function SettingsPage() {
 							Manage your account settings and preferences
 						</p>
 					</div>
-
-					{/* Masidy Plan */}
-					<LayerCard>
-						<LayerCard.Secondary className="font-funky-mono tracking-tighter">
-							Plan &amp; Usage
-						</LayerCard.Secondary>
-						<LayerCard.Primary>
-							<div className="grid gap-4">
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium text-kumo-default">Free plan</p>
-										<p className="text-sm text-kumo-subtle">Masidy handles all AI and infrastructure — no Cloudflare account needed.</p>
-									</div>
-									<span className="rounded-full bg-green-100 dark:bg-green-950 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-300">Active</span>
-								</div>
-							</div>
-						</LayerCard.Primary>
-					</LayerCard>
+					<UsageCard />
 
 					{/* Advanced: own Cloudflare account */}
 					<details className="group">

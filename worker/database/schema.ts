@@ -632,6 +632,54 @@ export type NewSession = typeof sessions.$inferInsert;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type NewApiKey = typeof apiKeys.$inferInsert;
 
+
+// ========================================
+// PLANS & SUBSCRIPTIONS (Phase 4)
+// ========================================
+
+export const PLAN_VALUES = ['free', 'pro', 'team'] as const;
+export type Plan = typeof PLAN_VALUES[number];
+
+export const PLAN_BUILD_LIMITS: Record<Plan, number> = {
+    free: 10,
+    pro: 100,
+    team: Infinity,
+};
+
+/**
+ * Subscriptions table — Stripe subscription state per user.
+ */
+export const subscriptions = sqliteTable('subscriptions', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+    plan: text('plan', { enum: ['free', 'pro', 'team'] }).notNull().default('free'),
+    stripeCustomerId: text('stripe_customer_id'),
+    stripeSubscriptionId: text('stripe_subscription_id'),
+    status: text('status', { enum: ['active', 'canceled', 'past_due', 'trialing'] }).default('active'),
+    currentPeriodStart: integer('current_period_start', { mode: 'timestamp' }),
+    currentPeriodEnd: integer('current_period_end', { mode: 'timestamp' }),
+    cancelAtPeriodEnd: integer('cancel_at_period_end', { mode: 'boolean' }).default(false),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('subscriptions_user_idx').on(table.userId),
+    stripeCustomerIdx: index('subscriptions_stripe_customer_idx').on(table.stripeCustomerId),
+}));
+
+/**
+ * User usage table — monthly build counter per user.
+ */
+export const userUsage = sqliteTable('user_usage', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    periodStart: integer('period_start', { mode: 'timestamp' }).notNull(),
+    buildsUsed: integer('builds_used').notNull().default(0),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userPeriodIdx: uniqueIndex('user_usage_user_period_idx').on(table.userId, table.periodStart),
+}));
+
 export type App = typeof apps.$inferSelect;
 export type NewApp = typeof apps.$inferInsert;
 
@@ -678,3 +726,8 @@ export type NewUserModelProvider = typeof userModelProviders.$inferInsert;
 
 export type Star = typeof stars.$inferSelect;
 export type NewStar = typeof stars.$inferInsert;
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type NewSubscription = typeof subscriptions.$inferInsert;
+export type UserUsage = typeof userUsage.$inferSelect;
+export type NewUserUsage = typeof userUsage.$inferInsert;

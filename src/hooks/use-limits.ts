@@ -74,6 +74,14 @@ export interface UsageSummary {
 		accountName?: string;
 		accountId?: string;
 	} | null;
+buildUsage?: {
+buildsUsed: number;
+buildsLimit: number;
+plan: 'free' | 'pro' | 'team';
+periodStart: string;
+periodEnd: string;
+withinLimits: boolean;
+} | null;
 }
 
 export async function fetchLimitsUsage(): Promise<UsageSummary> {

@@ -97,25 +97,24 @@ No Cloudflare account needed by end users. Everything runs on Masidy's paid Clou
 
 ## Phase 3 — Usage Dashboard
 **Goal:** Users see exactly how many AI builds / calls they've used and what's remaining.
-**Status:** ⏳ Pending
-**Branch:** `feat/phase-3-usage-dashboard`
+**Status:** ✅ Complete
 
 ### Tasks
-- [ ] 3.1 Usage API endpoint
+- [x] 3.1 Usage API endpoint
   - `GET /api/usage/me` returns builds used, AI tokens consumed, reset date
   - Track per-user build count in D1 (increment on each generation start)
   - Files: `worker/api/routes/index.ts`, `worker/database/schema.ts`
 
-- [ ] 3.2 Usage card in settings
+- [x] 3.2 Usage card in settings
   - Show: plan name, builds used / builds allowed, resets on date, upgrade CTA
   - Replace the Cloudflare section for regular users
   - File: `src/routes/settings/index.tsx`, new `src/components/usage-card.tsx`
 
-- [ ] 3.3 Usage in sidebar
+- [x] 3.3 Usage in sidebar
   - Small usage indicator at the bottom of sidebar (e.g. "12 / 30 builds")
   - File: `src/components/layout/app-sidebar.tsx`
 
-- [ ] 3.4 Usage in profile stats
+- [x] 3.4 Usage in profile stats
   - Add "Builds this month" to the 4 stat cards on profile page
   - File: `src/routes/profile.tsx`
 
@@ -123,40 +122,39 @@ No Cloudflare account needed by end users. Everything runs on Masidy's paid Clou
 
 ## Phase 4 — Billing + Plans (Stripe)
 **Goal:** Free tier → paid plans, Stripe checkout, subscription management.
-**Status:** ⏳ Pending
-**Branch:** `feat/phase-4-billing`
+**Status:** ✅ Complete
 
 ### Tasks
-- [ ] 4.1 Define plan tiers
+- [x] 4.1 Define plan tiers
   ```
   Free:    10 builds/month, platform deploy only, masidy.dev subdomain
   Pro:     100 builds/month, custom domain, priority AI
   Team:    Unlimited builds, team workspaces, custom domain
   ```
 
-- [ ] 4.2 Stripe integration
+- [x] 4.2 Stripe integration
   - Add Stripe secret key to secrets
   - Webhook endpoint: `POST /api/webhooks/stripe`
   - Handle: checkout.session.completed, customer.subscription.updated/deleted
   - Files: new `worker/services/stripe/`, `worker/api/routes/index.ts`
 
-- [ ] 4.3 Plan/subscription in D1
+- [x] 4.3 Plan/subscription in D1
   - Add `subscription` table: user_id, plan, stripe_customer_id, stripe_subscription_id, status, current_period_end
   - New migration
   - Files: `worker/database/schema.ts`
 
-- [ ] 4.4 Upgrade flow UI
+- [x] 4.4 Upgrade flow UI
   - Pricing page at `/pricing`
   - Upgrade CTA in settings when on free tier
   - Stripe Checkout redirect → return to `/settings?upgraded=true`
   - Files: new `src/routes/pricing.tsx`, `src/routes/settings/index.tsx`
 
-- [ ] 4.5 Plan enforcement
+- [x] 4.5 Plan enforcement
   - Gate build starts by checking plan + usage count
   - Show upgrade dialog when free tier exhausted (replace Cloudflare connect dialog)
   - Files: `worker/agents/core/`, `src/utils/usage-limit-checker.tsx`
 
-- [ ] 4.6 Billing portal
+- [x] 4.6 Billing portal
   - "Manage subscription" → Stripe Customer Portal link
   - Show in settings: plan name, next billing date, cancel option
   - File: `src/routes/settings/index.tsx`

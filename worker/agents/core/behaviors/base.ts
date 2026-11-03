@@ -25,6 +25,7 @@ import { FastCodeFixerOperation } from '../../operations/PostPhaseCodeFixer';
 import { looksLikeCommand, validateAndCleanBootstrapCommands } from '../../utils/common';
 import { customizeTemplateFiles, generateBootstrapScript } from '../../utils/templateCustomizer';
 import { AppService } from '../../../database';
+import { UsageService } from '../../../database/services/UsageService';
 import { RateLimitExceededError } from 'shared/types/errors';
 import { ImageAttachment, type ProcessedImageAttachment } from '../../../types/image-attachment';
 import { OperationOptions } from '../../operations/common';
@@ -471,6 +472,11 @@ export abstract class BaseCodingBehavior<TState extends BaseProjectState>
         this.logger.info('Starting code generation', {
             totalFiles: this.getTotalFiles()
         });
+        // Track build count for usage dashboard (best-effort, never blocks generation)
+        const stateAny = this.state as { userId?: string };
+        if (stateAny.userId) {
+            new UsageService(this.env).incrementBuildCount(stateAny.userId).catch(() => null);
+        }
         await this.ensureTemplateDetails();
         try {
             await this.build();
