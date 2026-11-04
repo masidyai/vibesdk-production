@@ -266,7 +266,7 @@ export default function Home() {
 							>
 								<InfoIcon
 									className="size-4 flex-shrink-0 mt-0.5"
-									style={{ color: '#ff3d00' }}
+									style={{ color: '#7FFF00' }}
 								/>
 								<p className="text-xs text-kumo-subtle leading-relaxed">
 									<span className="font-medium text-text-secondary">

@@ -505,7 +505,7 @@ export function LoginModal({
 					<p className="text-center text-xs text-kumo-subtle">
 						By continuing, you agree to our{' '}
 						<a
-							href="https://www.cloudflare.com/website-terms/"
+							href="https://masidy.dev/terms"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline hover:text-kumo-default"
@@ -514,7 +514,7 @@ export function LoginModal({
 						</a>{' '}
 						and{' '}
 						<a
-							href="https://www.cloudflare.com/privacypolicy/"
+							href="https://masidy.dev/privacy"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline hover:text-kumo-default"

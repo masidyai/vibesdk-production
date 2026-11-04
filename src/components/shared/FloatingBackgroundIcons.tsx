@@ -35,7 +35,7 @@ const FLOATING_ICONS: readonly FloatingIcon[] = [
 		dur: '7.5s',
 		delay: '0s',
 		bob: '-8px',
-		color: '#f6821f',
+		color: '#7FFF00',
 	},
 	{
 		Icon: RocketLaunch,
@@ -47,7 +47,7 @@ const FLOATING_ICONS: readonly FloatingIcon[] = [
 		dur: '6.4s',
 		delay: '1.4s',
 		bob: '-5px',
-		color: '#f6821f',
+		color: '#7FFF00',
 	},
 	{
 		Icon: RocketLaunch,
@@ -107,7 +107,7 @@ const FLOATING_ICONS: readonly FloatingIcon[] = [
 		dur: '8.8s',
 		delay: '0.4s',
 		bob: '-7px',
-		color: '#f6821f',
+		color: '#7FFF00',
 	},
 	// globe
 	{
