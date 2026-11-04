@@ -406,6 +406,14 @@ async function getApiKey(
         };
     }
 
+    // Workers AI uses Cloudflare API token - no external key needed
+    if (provider === 'workers-ai') {
+        return {
+            apiKey: env.CLOUDFLARE_API_TOKEN || env.CLOUDFLARE_AI_GATEWAY_TOKEN || '',
+            isUserCredential: false,
+        };
+    }
+
     // Fallback to environment variables (platform-owned secret)
     const providerKeyString = provider.toUpperCase().replaceAll('-', '_');
     const envKey = `${providerKeyString}_API_KEY` as keyof Env;
@@ -455,6 +463,9 @@ export async function getConfigurationForModel(
                     baseURL: 'https://api.anthropic.com/v1/',
                     apiKey: env.ANTHROPIC_API_KEY,
                 };
+            case 'workers-ai':
+                // Workers AI routes through CF AI binding - no directOverride needed
+                break;
             default:
                 providerForcedOverride = modelConfig.provider as AIGatewayProviders;
                 break;
@@ -760,6 +771,12 @@ export async function infer<OutputSchema extends z.ZodObject>({
 
         // Remove [*.] from model name
         modelName = modelName.replace(/\[.*?\]/, '');
+
+        // Strip "workers-ai/" prefix from model name for the actual API call
+        // (the provider is encoded in the config, not the model ID sent to the API)
+        if (modelName.startsWith('workers-ai/')) {
+            modelName = modelName.slice('workers-ai/'.length);
+        }
 
         const client = new OpenAI({ apiKey, baseURL: baseURL, defaultHeaders });
         const schemaObj =

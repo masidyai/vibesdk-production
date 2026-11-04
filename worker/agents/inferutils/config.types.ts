@@ -337,9 +337,51 @@ const MODELS_MASTER = {
             creditCost: 8, // $0.22
             contextSize: 262144, // 256K Context
         },
-    }
-} as const;
+    },
 
+    // --- Cloudflare Workers AI (FREE - no external keys needed) ---
+    WORKERS_AI_LLAMA_70B: {
+        id: 'workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+        config: {
+            name: 'Llama 3.3 70B (Fast)',
+            size: ModelSize.LARGE,
+            provider: 'workers-ai' as const,
+            creditCost: 0,
+            contextSize: 128000,
+        },
+    },
+    WORKERS_AI_QWEN_CODER: {
+        id: 'workers-ai/@cf/qwen/qwen2.5-coder-32b-instruct',
+        config: {
+            name: 'Qwen 2.5 Coder 32B',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai' as const,
+            creditCost: 0,
+            contextSize: 32000,
+        },
+    },
+    WORKERS_AI_DEEPSEEK_R1: {
+        id: 'workers-ai/@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',
+        config: {
+            name: 'DeepSeek R1 32B',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai' as const,
+            creditCost: 0,
+            contextSize: 32000,
+        },
+    },
+    WORKERS_AI_LLAMA_8B: {
+        id: 'workers-ai/@cf/meta/llama-3.1-8b-instruct-fp8',
+        config: {
+            name: 'Llama 3.1 8B',
+            size: ModelSize.LITE,
+            provider: 'workers-ai' as const,
+            creditCost: 0,
+            contextSize: 128000,
+        },
+    },
+
+} as const;
 /**
  * Generated AIModels object
  */
