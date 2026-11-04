@@ -12,11 +12,11 @@ import { env } from 'cloudflare:workers';
 // Common configs - these are good defaults
 const COMMON_AGENT_CONFIGS = {
     screenshotAnalysis: {
-        name: AIModels.DISABLED,
+        name: AIModels.WORKERS_AI_VISION,
         reasoning_effort: 'medium' as const,
         max_tokens: 8000,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
     },
     realtimeCodeFixer: {
         name: AIModels.WORKERS_AI_LLAMA_8B,
@@ -230,3 +230,15 @@ export const AGENT_CONSTRAINTS: Map<AgentActionKey, AgentConstraintConfig> = new
 		enabled: true,
 	}],
 ]);
+
+/**
+ * Returns the appropriate model config for a request that may include images.
+ * Workers AI only supports vision on llama-3.2-11b-vision-instruct.
+ * If images are present, use the vision model; otherwise use the default.
+ */
+export function getModelForImages(hasImages: boolean, defaultModel: string): string {
+    if (hasImages && defaultModel.startsWith('workers-ai/')) {
+        return AIModels.WORKERS_AI_VISION;
+    }
+    return defaultModel;
+}

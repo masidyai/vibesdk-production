@@ -861,7 +861,7 @@ export function AIMessage({
 		<div className="flex flex-col gap-2 min-w-0">
 			<div className="font-mono font-medium text-text-50 flex items-center gap-2 mb-3">
 				<AIAvatar className="size-5 text-brand shrink-0" />
-				Orange
+				Masidy AI
 				{isThinking && <Sparkles className="size-3 text-brand animate-pulse" />}
 			</div>
 			<div className={cn(isThinking && 'animate-pulse')}>

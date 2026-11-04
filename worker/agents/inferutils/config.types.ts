@@ -380,6 +380,16 @@ const MODELS_MASTER = {
             contextSize: 128000,
         },
     },
+    WORKERS_AI_VISION: {
+        id: 'workers-ai/@cf/meta/llama-3.2-11b-vision-instruct',
+        config: {
+            name: 'Llama 3.2 11B Vision',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai' as const,
+            creditCost: 0,
+            contextSize: 128000,
+        },
+    }
 
 } as const;
 /**
