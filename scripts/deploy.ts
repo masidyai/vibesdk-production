@@ -1784,6 +1784,10 @@ class CloudflareDeploymentManager {
 			'DISPATCH_NAMESPACE',
 			'ENVIRONMENT',
 			'PLATFORM_MODEL_PROVIDERS',
+			'STRIPE_SECRET_KEY',
+			'STRIPE_WEBHOOK_SECRET',
+			'STRIPE_PRO_PRICE_ID',
+			'STRIPE_TEAM_PRICE_ID',
 		];
 		const configuredSecretConflicts = allSecretVars.filter((varName) =>
 			Object.hasOwn(configuredVars, varName),
