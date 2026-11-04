@@ -30,6 +30,8 @@ declare namespace Cloudflare {
 		STRIPE_WEBHOOK_SECRET?: string;
 		STRIPE_PRO_PRICE_ID?: string;
 		STRIPE_TEAM_PRICE_ID?: string;
+		GITHUB_EXPORTER_CLIENT_ID?: string;
+		GITHUB_EXPORTER_CLIENT_SECRET?: string;
 		SANDBOX_SERVICE_TYPE: string;
 		SANDBOX_SERVICE_URL: string;
 		SENTRY_DSN: string;

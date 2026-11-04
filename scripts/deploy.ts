@@ -1788,6 +1788,8 @@ class CloudflareDeploymentManager {
 			'STRIPE_WEBHOOK_SECRET',
 			'STRIPE_PRO_PRICE_ID',
 			'STRIPE_TEAM_PRICE_ID',
+			'GITHUB_EXPORTER_CLIENT_ID',
+			'GITHUB_EXPORTER_CLIENT_SECRET',
 		];
 		const configuredSecretConflicts = allSecretVars.filter((varName) =>
 			Object.hasOwn(configuredVars, varName),
