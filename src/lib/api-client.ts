@@ -1422,6 +1422,26 @@ class ApiClient {
 		return this.request('/api/billing/portal', { method: 'POST' });
 	}
 
+	// ================================
+	// Custom Domain API Methods
+	// ================================
+
+	async getAppDomains(appId: string): Promise<ApiResponse<{ domains: unknown[] }>> {
+		return this.request(`/api/apps/${appId}/domains`);
+	}
+
+	async addAppDomain(appId: string, domain: string): Promise<ApiResponse<{ domain: unknown; instructions: unknown }>> {
+		return this.request(`/api/apps/${appId}/domains`, { method: 'POST', body: JSON.stringify({ domain }) });
+	}
+
+	async verifyAppDomain(appId: string, domainId: string): Promise<ApiResponse<{ verified: boolean; reason?: string }>> {
+		return this.request(`/api/apps/${appId}/domains/${domainId}/verify`, { method: 'POST' });
+	}
+
+	async removeAppDomain(appId: string, domainId: string): Promise<ApiResponse<{ message: string }>> {
+		return this.request(`/api/apps/${appId}/domains/${domainId}`, { method: 'DELETE' });
+	}
+
 }
 
 // Export singleton instance

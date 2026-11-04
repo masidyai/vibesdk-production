@@ -633,6 +633,30 @@ export type ApiKey = typeof apiKeys.$inferSelect;
 export type NewApiKey = typeof apiKeys.$inferInsert;
 
 
+
+// ========================================
+// CUSTOM DOMAINS (Phase 5)
+// ========================================
+
+/**
+ * Custom domains table — user-owned domains mapped to deployed apps.
+ */
+export const customDomains = sqliteTable('custom_domains', {
+    id: text('id').primaryKey(),
+    appId: text('app_id').notNull().references(() => apps.id, { onDelete: 'cascade' }),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    domain: text('domain').notNull().unique(),
+    verified: integer('verified', { mode: 'boolean' }).default(false),
+    verificationToken: text('verification_token').notNull(),
+    cloudflareHostnameId: text('cloudflare_hostname_id'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    appIdx: index('custom_domains_app_idx').on(table.appId),
+    userIdx: index('custom_domains_user_idx').on(table.userId),
+    domainIdx: uniqueIndex('custom_domains_domain_idx').on(table.domain),
+}));
+
 // ========================================
 // PLANS & SUBSCRIPTIONS (Phase 4)
 // ========================================
@@ -731,3 +755,6 @@ export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
 export type UserUsage = typeof userUsage.$inferSelect;
 export type NewUserUsage = typeof userUsage.$inferInsert;
+
+export type CustomDomain = typeof customDomains.$inferSelect;
+export type NewCustomDomain = typeof customDomains.$inferInsert;

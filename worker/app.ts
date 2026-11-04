@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { handleSubdomainRequest } from './middleware/subdomain-router';
+import { handleSubdomainRequest, handleCustomDomainRequest } from './middleware/subdomain-router';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import { getCORSConfig, getSecureHeadersConfig } from './config/security';
@@ -27,6 +27,10 @@ export function createApp(env: Env): Hono<AppEnv> {
         if (subdomainMatch) {
             const slug = subdomainMatch[1];
             const handled = await handleSubdomainRequest(c.req.raw, env, slug);
+            if (handled) return handled;
+        } else if (host !== customDomain && !host.endsWith('.' + customDomain)) {
+            // Not a masidy subdomain — try as a custom domain
+            const handled = await handleCustomDomainRequest(c.req.raw, env, host);
             if (handled) return handled;
         }
         return next();

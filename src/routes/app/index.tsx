@@ -3,6 +3,7 @@ import { MonacoEditor } from '@/components/monaco-editor/lazy-monaco-editor';
 import { AppLoadingSkeleton } from '@/components/shared/AppLoadingSkeleton';
 import { FloatingBackgroundIcons } from '@/components/shared/FloatingBackgroundIcons';
 import { GitCloneModal } from '@/components/shared/GitCloneModal';
+import { CustomDomainPanel } from '@/components/custom-domain-panel';
 import {
 	useApp,
 	useAppPreviewToken,
@@ -454,6 +455,18 @@ export default function AppView() {
 					>
 						{app.title}
 					</h1>
+					{app.publishedUrl && (
+						<a
+							href={app.publishedUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="hidden sm:flex items-center gap-1 text-xs text-kumo-subtle hover:text-brand transition-colors font-mono max-w-[180px] truncate"
+							title={app.publishedUrl}
+						>
+							<Globe className="size-3 shrink-0" weight="duotone" />
+							{app.publishedUrl.replace("https://", "")}
+						</a>
+					)}
 					<Badge
 						className="shrink-0"
 						variant={
@@ -660,6 +673,11 @@ export default function AppView() {
 	return (
 		<div className="size-full flex flex-col min-h-0">
 			<title>{app.title ? `${app.title} - Masidy` : 'App - Masidy'}</title>
+			{app.publishedUrl && (
+				<div className="hidden">
+					{/* publishedUrl available: {app.publishedUrl} */}
+				</div>
+			)}
 			<div className="shrink-0 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-4 py-2 border-b bg-kumo-base">
 				<Tabs
 					value={activeTab}
@@ -1036,6 +1054,12 @@ export default function AppView() {
 					errorMessage={deleteError}
 					className="sm:w-[32rem]"
 				/>
+			)}
+
+			{isOwner && (
+				<div className="fixed bottom-4 right-4 w-96 z-50 hidden">
+					<CustomDomainPanel appId={app.id} />
+				</div>
 			)}
 
 			<GitCloneModal

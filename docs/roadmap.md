@@ -163,29 +163,28 @@ No Cloudflare account needed by end users. Everything runs on Masidy's paid Clou
 
 ## Phase 5 — Custom Domains
 **Goal:** Pro/Team users can map their own domain to their deployed app.
-**Status:** ⏳ Pending
-**Branch:** `feat/phase-5-custom-domains`
+**Status:** ✅ Complete
 
 ### Tasks
-- [ ] 5.1 Custom domain model in D1
+- [x] 5.1 Custom domain model in D1
   - Add `custom_domains` table: app_id, domain, verified, cloudflare_hostname_id
   - Files: `worker/database/schema.ts`
 
-- [ ] 5.2 Domain verification flow
+- [x] 5.2 Domain verification flow
   - User adds domain → we give them a CNAME record to add
   - Poll Cloudflare API to check DNS propagation
   - Files: new `worker/services/custom-domains.ts`, `worker/api/controllers/`
 
-- [ ] 5.3 Custom domain routing
+- [x] 5.3 Custom domain routing
   - Worker reads `Host` header → looks up custom_domains table → routes to correct app
   - Files: `worker/app.ts`, `worker/index.ts`
 
-- [ ] 5.4 Custom domain UI in app settings
+- [x] 5.4 Custom domain UI in app settings
   - Add "Custom Domain" section to app detail page
   - Show DNS instructions, verification status, remove domain
   - File: `src/routes/app/index.tsx`
 
-- [ ] 5.5 SSL provisioning
+- [x] 5.5 SSL provisioning
   - Use Cloudflare Hostname-level SSL API to provision cert for custom domain
   - Advanced Certificate Manager subscription already covers this ✅
 

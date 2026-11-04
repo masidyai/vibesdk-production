@@ -1,5 +1,6 @@
 import { AppController } from '../controllers/apps/controller';
 import { PublishController } from '../controllers/publish/controller';
+import { CustomDomainController } from '../controllers/customDomain/controller';
 import { AppViewController } from '../controllers/appView/controller';
 import { Hono } from 'hono';
 import { AppEnv } from '../../types/appenv';
@@ -71,6 +72,12 @@ export function setupAppRoutes(app: Hono<AppEnv>): void {
 
     // Unpublish app - OWNER ONLY
     appRouter.delete('/:appId/publish', setAuthLevel(AuthConfig.ownerOnly), adaptController(PublishController, PublishController.unpublishApp));
+
+    // Custom domains - OWNER ONLY
+    appRouter.get('/:appId/domains', setAuthLevel(AuthConfig.ownerOnly), adaptController(CustomDomainController, CustomDomainController.listDomains));
+    appRouter.post('/:appId/domains', setAuthLevel(AuthConfig.ownerOnly), adaptController(CustomDomainController, CustomDomainController.addDomain));
+    appRouter.post('/:appId/domains/:domainId/verify', setAuthLevel(AuthConfig.ownerOnly), adaptController(CustomDomainController, CustomDomainController.verifyDomain));
+    appRouter.delete('/:appId/domains/:domainId', setAuthLevel(AuthConfig.ownerOnly), adaptController(CustomDomainController, CustomDomainController.removeDomain));
     
     // ========================================
     // GIT CLONE ROUTES
