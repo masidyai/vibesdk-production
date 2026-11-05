@@ -36,6 +36,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useUserStats, useUserActivity } from '@/hooks/use-stats';
 import { useUpdateProfile } from '@/hooks/use-profile';
+import { apiClient } from '@/lib/api-client';
 import { useLimitsContext } from '@/contexts/limits-context';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useApps } from '@/hooks/use-apps';
@@ -97,6 +98,24 @@ export default function Profile() {
 	const { apps: recentApps, loading: appsLoading } = useApps();
 	const { mutateAsync: saveProfile, isPending: isSaving } =
 		useUpdateProfile();
+
+	const [avatarUploading, setAvatarUploading] = React.useState(false);
+	const avatarInputRef = React.useRef<HTMLInputElement>(null);
+	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		setAvatarUploading(true);
+		try {
+			const res = await apiClient.uploadAvatar(file);
+			if (res.success) {
+				e.target.value = '';
+				toast.success('Avatar updated!');
+			} else {
+				toast.error(res.error?.message ?? 'Upload failed');
+			}
+		} catch { toast.error('Upload failed'); }
+		finally { setAvatarUploading(false); }
+	};
 	const { copied: copiedUrl, copy: copyUrl } = useCopyToClipboard();
 	const { data: limitsData } = useLimitsContext();
 	const buildUsage = limitsData?.buildUsage;
@@ -157,12 +176,18 @@ export default function Profile() {
 			<main className="container mx-auto max-w-4xl px-4 py-12 pb-24">
 				{/* Header */}
 				<div className="mb-10 flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-					<Avatar className="size-20 ring-2 ring-kumo-line shadow-md sm:size-24">
-						<AvatarImage src={user?.avatarUrl} />
-						<AvatarFallback className="bg-kumo-base text-3xl font-semibold">
-							{initials}
-						</AvatarFallback>
-					</Avatar>
+					<button type="button" className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()} title="Change avatar">
+						<Avatar className="size-20 ring-2 ring-kumo-line shadow-md sm:size-24">
+							<AvatarImage src={user?.avatarUrl} />
+							<AvatarFallback className="bg-kumo-base text-3xl font-semibold">
+								{initials}
+							</AvatarFallback>
+						</Avatar>
+						<div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+							<span className="text-white text-xs">{avatarUploading ? '...' : 'Edit'}</span>
+						</div>
+					</button>
+					<input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
 
 					<div className="min-w-0 flex-1 text-center sm:text-left">
 						<div className="mb-1.5 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">

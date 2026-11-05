@@ -190,6 +190,43 @@ No Cloudflare account needed by end users. Everything runs on Masidy's paid Clou
 
 ---
 
+
+---
+
+## Live Fixes (Post-Phase)
+
+### AI Engine
+- ✅ Switched from external providers (Anthropic/Google) to Cloudflare Workers AI (free)
+- ✅ Models: kimi-k2.7-code (coding/tool-calling), llama-3.3-70b (conversation), deepseek-r1 (debug)
+- ✅ Workers AI models verified to support structured tool_calls (critical for agent behavior)
+- ✅ No external API keys needed — all free via Workers Paid plan
+
+### Deploy Pipeline
+- ✅ Fixed: ctx.abort("Generated app deployment updated") was incorrectly treated as error
+- ✅ Fixed: Preview "Access denied - missing access token" (caused by above — token never minted)
+- ✅ Fixed: AI agent reporting "Deploy failed" on every successful deploy
+
+### Chat UI
+- ✅ Fixed: "Orange" renamed to "Masidy AI" in chat response bubbles
+- ✅ Fixed: Images uploaded on home page now display in chat message bubble
+- ✅ Fixed: Raw JSON tool calls now render as proper clarifying questions popup (Gemini issue resolved)
+
+### Auth & OAuth
+- ✅ Google OAuth: configured correctly at aistudio → masidy.dev
+- ✅ GitHub OAuth: fixed wrong redirect URI (was pointing to github-exporter callback)
+- ✅ GitHub Export: separate OAuth App created with repo scope
+- ✅ All secrets pushed to live Worker: Anthropic, Google, GitHub, JWT, Stripe
+
+### Branding
+- ✅ Logo: MasidyLogo renders from actual brand PNG with mix-blend-mode transparency
+- ✅ Favicon: full set (16/32/192/512px, apple-touch-icon, PWA manifest)
+- ✅ OG tags: og:title, og:image, og:description, twitter:card in index.html
+- ✅ Remaining orange color refs replaced with lime (#7FFF00)
+- ✅ Terms/Privacy links updated from cloudflare.com to masidy.dev
+
+---
+
+## Next Up: Phase 6 — Polish
 ## Phase 6 — Polish + Images/Stream
 **Goal:** Use remaining subscriptions, improve media handling.
 **Status:** ⏳ Pending

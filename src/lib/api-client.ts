@@ -1442,6 +1442,15 @@ class ApiClient {
 		return this.request(`/api/apps/${appId}/domains/${domainId}`, { method: 'DELETE' });
 	}
 
+	/** Upload a profile avatar image. */
+	async uploadAvatar(file: File): Promise<ApiResponse<{ avatarUrl: string; message: string }>> {
+		return this.request('/api/auth/avatar', {
+			method: 'POST',
+			body: file,
+			headers: { 'Content-Type': file.type },
+		});
+	}
+
 }
 
 // Export singleton instance

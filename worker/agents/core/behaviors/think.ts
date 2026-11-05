@@ -769,6 +769,13 @@ export class ThinkCodingBehavior
 		try {
 			const url = await this.getBrowserPreviewURL();
 			this.broadcast(WebSocketMessageResponses.DEPLOYMENT_COMPLETED, { previewURL: url });
+			// Auto-capture screenshot for app card thumbnail (best-effort, non-blocking)
+			const previewForScreenshot = url.split('?')[0]; // strip token
+			if (previewForScreenshot) {
+				setTimeout(() => {
+					this.captureScreenshot(previewForScreenshot).catch(() => null);
+				}, 3000); // wait 3s for the app to fully load before capturing
+			}
 		} catch (e) {
 			this.logger.warn('Failed to surface preview after deploy_space', e);
 		}

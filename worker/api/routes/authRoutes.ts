@@ -2,6 +2,7 @@
  * Authentication Routes
  */
 import { AuthController } from '../controllers/auth/controller';
+import { AvatarController } from '../controllers/avatar/controller';
 import { Hono } from 'hono';
 import { AppEnv } from '../../types/appenv';
 import { adaptController } from '../honoAdapter';
@@ -47,6 +48,10 @@ export function setupAuthRoutes(app: Hono<AppEnv>): void {
     authRouter.delete('/identities/:provider', setAuthLevel(AuthConfig.authenticated), adaptController(AuthController, AuthController.unlinkProvider));
     authRouter.get('/link/:provider', setAuthLevel(AuthConfig.authenticated), adaptController(AuthController, AuthController.initiateProviderLink));
     
+    // Avatar upload
+    authRouter.post('/avatar', setAuthLevel(AuthConfig.authenticated), adaptController(AvatarController, AvatarController.uploadAvatar));
+    authRouter.get('/avatar/:userId', setAuthLevel(AuthConfig.public), adaptController(AvatarController, AvatarController.getAvatar));
+
     // OAuth routes (under /oauth path to avoid conflicts)
     authRouter.get('/oauth/:provider', setAuthLevel(AuthConfig.public), adaptController(AuthController, AuthController.initiateOAuth));
     authRouter.get('/callback/:provider', setAuthLevel(AuthConfig.public), adaptController(AuthController, AuthController.handleOAuthCallback));
