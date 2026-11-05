@@ -1,13 +1,12 @@
 import { ModelSize, type AIModelConfig } from '../inferutils/config.types';
 
-// Gemini - free quota on Google AI Studio, proper OpenAI-compatible tool calls
-// Workers AI models do not support structured tool calls in the format Think requires
-export const THINK_MODEL_ID = 'google-ai-studio/gemini-2.5-flash';
+// Kimi K2.7 Code - Workers AI, FREE, supports structured tool calls
+export const THINK_MODEL_ID = 'workers-ai/@cf/moonshotai/kimi-k2.7-code';
 
 export const THINK_MODEL_CONFIG: AIModelConfig = {
-	name: 'Gemini 2.5 Flash',
+	name: 'Kimi K2.7 Code',
 	size: ModelSize.REGULAR,
-	provider: 'google-ai-studio',
+	provider: 'workers-ai',
 	creditCost: 0,
-	contextSize: 1_048_576,
+	contextSize: 128000,
 };

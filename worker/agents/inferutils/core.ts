@@ -458,6 +458,9 @@ export async function getConfigurationForModel(
                     baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
                     apiKey: env.GOOGLE_AI_STUDIO_API_KEY,
                 };
+            case 'workers-ai':
+                // Workers AI routes through CF AI binding
+                break;
             case 'anthropic':
                 return {
                     baseURL: 'https://api.anthropic.com/v1/',

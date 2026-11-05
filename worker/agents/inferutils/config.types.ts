@@ -389,7 +389,27 @@ const MODELS_MASTER = {
             creditCost: 0,
             contextSize: 128000,
         },
-    }
+    },
+    WORKERS_AI_KIMI_CODE: {
+        id: 'workers-ai/@cf/moonshotai/kimi-k2.7-code',
+        config: {
+            name: 'Kimi K2.7 Code',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai' as const,
+            creditCost: 0,
+            contextSize: 128000,
+        },
+    },
+    WORKERS_AI_DEEPSEEK_FLASH: {
+        id: 'workers-ai/@cf/deepseek-ai/deepseek-v4-flash-0731',
+        config: {
+            name: 'DeepSeek V4 Flash',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai' as const,
+            creditCost: 0,
+            contextSize: 128000,
+        },
+    },
 
 } as const;
 /**

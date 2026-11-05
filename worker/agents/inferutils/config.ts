@@ -123,66 +123,80 @@ const PLATFORM_AGENT_CONFIG: AgentConfig = {
 // Default config uses Cloudflare Workers AI models exclusively
 // These are FREE with Workers Paid plan — no external API keys needed
 // Default config: Gemini via Google AI Studio (free quota, proper OpenAI-compatible tool calls)
+// Default: Workers AI with tool calling support (FREE, no external keys)
 const DEFAULT_AGENT_CONFIG: AgentConfig = {
     ...COMMON_AGENT_CONFIGS,
     templateSelection: {
-        name: AIModels.GEMINI_2_5_FLASH_LITE,
+        name: AIModels.WORKERS_AI_LLAMA_8B,
         max_tokens: 2000,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.WORKERS_AI_KIMI_CODE,
         temperature: 0.6,
     },
     blueprint: {
-        name: AIModels.GEMINI_2_5_FLASH,
+        name: AIModels.WORKERS_AI_KIMI_CODE,
         reasoning_effort: 'high',
-        max_tokens: 64000,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        max_tokens: 32000,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
         temperature: 1,
     },
     projectSetup: {
-        name: AIModels.GEMINI_2_5_FLASH,
-        ...SHARED_IMPLEMENTATION_CONFIG,
-    },
-    phaseGeneration: {
-        name: AIModels.GEMINI_2_5_FLASH,
-        ...SHARED_IMPLEMENTATION_CONFIG,
-    },
-    firstPhaseImplementation: {
-        name: AIModels.GEMINI_2_5_FLASH,
-        ...SHARED_IMPLEMENTATION_CONFIG,
-    },
-    phaseImplementation: {
-        name: AIModels.GEMINI_2_5_FLASH,
-        ...SHARED_IMPLEMENTATION_CONFIG,
-    },
-    conversationalResponse: {
-        name: AIModels.GEMINI_2_5_FLASH,
-        reasoning_effort: 'low',
-        max_tokens: 4000,
-        temperature: 0,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH_LITE,
-    },
-    deepDebugger: {
-        name: AIModels.GEMINI_2_5_PRO,
-        reasoning_effort: 'high',
-        max_tokens: 8000,
-        temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
-    },
-    fileRegeneration: {
-        name: AIModels.GEMINI_2_5_FLASH,
+        name: AIModels.WORKERS_AI_KIMI_CODE,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH_LITE,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
     },
-    agenticProjectBuilder: {
-        name: AIModels.GEMINI_2_5_FLASH,
+    phaseGeneration: {
+        name: AIModels.WORKERS_AI_KIMI_CODE,
+        reasoning_effort: 'low',
+        max_tokens: 32000,
+        temperature: 1,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
+    },
+    firstPhaseImplementation: {
+        name: AIModels.WORKERS_AI_KIMI_CODE,
+        reasoning_effort: 'low',
+        max_tokens: 32000,
+        temperature: 1,
+        fallbackModel: AIModels.WORKERS_AI_DEEPSEEK_R1,
+    },
+    phaseImplementation: {
+        name: AIModels.WORKERS_AI_KIMI_CODE,
+        reasoning_effort: 'low',
+        max_tokens: 32000,
+        temperature: 1,
+        fallbackModel: AIModels.WORKERS_AI_DEEPSEEK_R1,
+    },
+    conversationalResponse: {
+        name: AIModels.WORKERS_AI_LLAMA_70B,
+        reasoning_effort: 'low',
+        max_tokens: 4000,
+        temperature: 0,
+        fallbackModel: AIModels.WORKERS_AI_KIMI_CODE,
+    },
+    deepDebugger: {
+        name: AIModels.WORKERS_AI_DEEPSEEK_R1,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.WORKERS_AI_KIMI_CODE,
+    },
+    fileRegeneration: {
+        name: AIModels.WORKERS_AI_KIMI_CODE,
+        reasoning_effort: 'low',
+        max_tokens: 32000,
+        temperature: 1,
+        fallbackModel: AIModels.WORKERS_AI_DEEPSEEK_R1,
+    },
+    agenticProjectBuilder: {
+        name: AIModels.WORKERS_AI_KIMI_CODE,
+        reasoning_effort: 'high',
+        max_tokens: 8000,
+        temperature: 1,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
     },
 };
+
 
 
 export const AGENT_CONFIG: AgentConfig = env.PLATFORM_MODEL_PROVIDERS 
