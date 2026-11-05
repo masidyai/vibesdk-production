@@ -1,13 +1,13 @@
 import { ModelSize, type AIModelConfig } from '../inferutils/config.types';
 
-// Use Cloudflare Workers AI - FREE with Workers Paid plan
-// Best coding model available on Workers AI
-export const THINK_MODEL_ID = 'workers-ai/@cf/qwen/qwen2.5-coder-32b-instruct';
+// Gemini - free quota on Google AI Studio, proper OpenAI-compatible tool calls
+// Workers AI models do not support structured tool calls in the format Think requires
+export const THINK_MODEL_ID = 'google-ai-studio/gemini-2.5-flash';
 
 export const THINK_MODEL_CONFIG: AIModelConfig = {
-	name: 'Qwen 2.5 Coder 32B',
+	name: 'Gemini 2.5 Flash',
 	size: ModelSize.REGULAR,
-	provider: 'workers-ai',
+	provider: 'google-ai-studio',
 	creditCost: 0,
-	contextSize: 32000,
+	contextSize: 1_048_576,
 };

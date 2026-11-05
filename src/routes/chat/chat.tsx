@@ -1134,6 +1134,7 @@ function ChatSession() {
 								{!appLoading && (
 									<UserMessage
 										message={query ?? displayQuery}
+          images={userImages}
 									/>
 								)}
 

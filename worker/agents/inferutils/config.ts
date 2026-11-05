@@ -19,11 +19,11 @@ const COMMON_AGENT_CONFIGS = {
         fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
     },
     realtimeCodeFixer: {
-        name: AIModels.WORKERS_AI_LLAMA_8B,
+        name: AIModels.GEMINI_2_5_FLASH,
         reasoning_effort: 'low' as const,
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
+        fallbackModel: AIModels.GEMINI_2_5_PRO,
     },
     fastCodeFixer: {
         name: AIModels.DISABLED,
@@ -122,78 +122,68 @@ const PLATFORM_AGENT_CONFIG: AgentConfig = {
 /* These are the default out-of-the box gemini-only models used when PLATFORM_MODEL_PROVIDERS is not set */
 // Default config uses Cloudflare Workers AI models exclusively
 // These are FREE with Workers Paid plan — no external API keys needed
+// Default config: Gemini via Google AI Studio (free quota, proper OpenAI-compatible tool calls)
 const DEFAULT_AGENT_CONFIG: AgentConfig = {
     ...COMMON_AGENT_CONFIGS,
     templateSelection: {
-        name: AIModels.WORKERS_AI_LLAMA_8B,
+        name: AIModels.GEMINI_2_5_FLASH_LITE,
         max_tokens: 2000,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
+        fallbackModel: AIModels.GEMINI_2_5_FLASH,
         temperature: 0.6,
     },
     blueprint: {
-        name: AIModels.WORKERS_AI_LLAMA_70B,
+        name: AIModels.GEMINI_2_5_FLASH,
         reasoning_effort: 'high',
-        max_tokens: 32000,
-        fallbackModel: AIModels.WORKERS_AI_QWEN_CODER,
+        max_tokens: 64000,
+        fallbackModel: AIModels.GEMINI_2_5_PRO,
         temperature: 1,
     },
     projectSetup: {
-        name: AIModels.WORKERS_AI_QWEN_CODER,
-        reasoning_effort: 'low',
-        max_tokens: 32000,
-        temperature: 1,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
+        name: AIModels.GEMINI_2_5_FLASH,
+        ...SHARED_IMPLEMENTATION_CONFIG,
     },
     phaseGeneration: {
-        name: AIModels.WORKERS_AI_LLAMA_70B,
-        reasoning_effort: 'low',
-        max_tokens: 32000,
-        temperature: 1,
-        fallbackModel: AIModels.WORKERS_AI_QWEN_CODER,
+        name: AIModels.GEMINI_2_5_FLASH,
+        ...SHARED_IMPLEMENTATION_CONFIG,
     },
     firstPhaseImplementation: {
-        name: AIModels.WORKERS_AI_QWEN_CODER,
-        reasoning_effort: 'low',
-        max_tokens: 32000,
-        temperature: 1,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
+        name: AIModels.GEMINI_2_5_FLASH,
+        ...SHARED_IMPLEMENTATION_CONFIG,
     },
     phaseImplementation: {
-        name: AIModels.WORKERS_AI_QWEN_CODER,
-        reasoning_effort: 'low',
-        max_tokens: 32000,
-        temperature: 1,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
+        name: AIModels.GEMINI_2_5_FLASH,
+        ...SHARED_IMPLEMENTATION_CONFIG,
     },
     conversationalResponse: {
-        name: AIModels.WORKERS_AI_LLAMA_70B,
+        name: AIModels.GEMINI_2_5_FLASH,
         reasoning_effort: 'low',
         max_tokens: 4000,
         temperature: 0,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_8B,
+        fallbackModel: AIModels.GEMINI_2_5_FLASH_LITE,
     },
     deepDebugger: {
-        name: AIModels.WORKERS_AI_DEEPSEEK_R1,
+        name: AIModels.GEMINI_2_5_PRO,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 1,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
+        fallbackModel: AIModels.GEMINI_2_5_FLASH,
     },
     fileRegeneration: {
-        name: AIModels.WORKERS_AI_QWEN_CODER,
+        name: AIModels.GEMINI_2_5_FLASH,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 1,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_70B,
+        fallbackModel: AIModels.GEMINI_2_5_FLASH_LITE,
     },
     agenticProjectBuilder: {
-        name: AIModels.WORKERS_AI_LLAMA_70B,
+        name: AIModels.GEMINI_2_5_FLASH,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 1,
-        fallbackModel: AIModels.WORKERS_AI_QWEN_CODER,
+        fallbackModel: AIModels.GEMINI_2_5_PRO,
     },
 };
+
 
 export const AGENT_CONFIG: AgentConfig = env.PLATFORM_MODEL_PROVIDERS 
     ? PLATFORM_AGENT_CONFIG 

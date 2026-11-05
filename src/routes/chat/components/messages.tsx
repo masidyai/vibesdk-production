@@ -26,7 +26,7 @@ function sanitizeMessageForDisplay(message: string): string {
 	return message.replace(/<system_context>[\s\S]*?<\/system_context>\n/gi, '').trim();
 }
 
-export function UserMessage({ message }: { message: string }) {
+export function UserMessage({ message, images }: { message: string; images?: { id: string; filename: string; mimeType: string; base64Data?: string }[] }) {
 	const sanitizedMessage = sanitizeMessageForDisplay(message);
 
 	return (
@@ -37,6 +37,23 @@ export function UserMessage({ message }: { message: string }) {
 				</div>
 				<div className="font-medium text-text-50">You</div>
 			</div>
+			{images && images.length > 0 && (
+				<div className="flex flex-wrap gap-2 mb-2">
+					{images.map((img) => (
+						<div key={img.id} className="relative rounded-lg overflow-hidden border border-kumo-line" style={{ maxWidth: 200 }}>
+							{img.base64Data ? (
+								<img
+									src={`data:${img.mimeType};base64,${img.base64Data}`}
+									alt={img.filename}
+									className="max-w-full max-h-48 object-contain"
+								/>
+							) : (
+								<div className="px-3 py-2 text-xs text-kumo-subtle">{img.filename}</div>
+							)}
+						</div>
+					))}
+				</div>
+			)}
 			<Markdown className="text-text-primary/80">{sanitizedMessage}</Markdown>
 		</div>
 	);
