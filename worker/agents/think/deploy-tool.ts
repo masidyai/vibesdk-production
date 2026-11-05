@@ -13,41 +13,52 @@ import { z } from 'zod';
 import { withDurableObjectResetRetry, type SpaceWorkspaceStub } from './space-workspace-ops';
 
 const DESCRIPTION = [
-	'Commit the current working tree and deploy a branch so its preview rebuilds and serves the latest code.',
-	'',
-	'Call this after writing/editing files to make changes visible in the preview. Returns the deploy result as JSON, including the preview path and any build errors — read those errors and fix the code if the build failed, then redeploy.',
-	'',
-	"Defaults to the 'main' branch.",
+'Commit the current working tree and deploy a branch so its preview rebuilds and serves the latest code.',
+'',
+'Call this after writing/editing files to make changes visible in the preview. Returns the deploy result as JSON, including the preview path and any build errors — read those errors and fix the code if the build failed, then redeploy.',
+'',
+"Defaults to the 'main' branch.",
 ].join('\n');
 
 export function createDeploySpaceTool(opts: { getStub: () => SpaceWorkspaceStub }): Tool {
-	const { getStub } = opts;
-	return tool({
-		description: DESCRIPTION,
-		inputSchema: z.object({
-			branch: z
-				.string()
-				.optional()
-				.describe("Git branch to deploy. Defaults to 'main'."),
-		}),
-		execute: async (args: { branch?: string }) => {
-			const branch = args.branch && args.branch.length > 0 ? args.branch : 'main';
-			try {
-				await withDurableObjectResetRetry(getStub, (stub) =>
-					stub.gitCommit('deploy: snapshot working tree'),
-				);
-			} catch {
-				// No changes to commit (clean tree) — proceed to deploy the existing HEAD.
-			}
-			try {
-				const result = await withDurableObjectResetRetry(getStub, (stub) => stub.deploy(branch));
-				return JSON.stringify({ branch, ...(result as Record<string, unknown>) }, null, 2);
-			} catch (e) {
-				return JSON.stringify({
-					branch,
-					error: `Deploy failed: ${e instanceof Error ? e.message : String(e)}`,
-				});
-			}
-		},
-	});
+const { getStub } = opts;
+return tool({
+description: DESCRIPTION,
+inputSchema: z.object({
+branch: z
+.string()
+.optional()
+.describe("Git branch to deploy. Defaults to 'main'."),
+}),
+execute: async (args: { branch?: string }) => {
+const branch = args.branch && args.branch.length > 0 ? args.branch : 'main';
+try {
+await withDurableObjectResetRetry(getStub, (stub) =>
+stub.gitCommit('deploy: snapshot working tree'),
+);
+} catch {
+// No changes to commit (clean tree) — proceed to deploy the existing HEAD.
+}
+try {
+const result = await withDurableObjectResetRetry(getStub, (stub) => stub.deploy(branch));
+return JSON.stringify({ branch, ...(result as Record<string, unknown>) }, null, 2);
+} catch (e) {
+const msg = e instanceof Error ? e.message : String(e);
+// SpaceDO calls ctx.abort("Generated app deployment updated") after a successful
+// deploy so the DO restarts with the new worker code. This is intentional —
+// treat it as success, not failure.
+if (
+msg.includes('Generated app deployment updated') ||
+msg.includes('Durable Object reset because its code was updated') ||
+msg.includes('DO was reset')
+) {
+return JSON.stringify({ branch, deployed: true, note: 'Deploy succeeded — worker restarted with new code.' });
+}
+return JSON.stringify({
+branch,
+error: `Deploy failed: ${msg}`,
+});
+}
+},
+});
 }
