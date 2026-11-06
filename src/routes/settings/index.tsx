@@ -316,6 +316,19 @@ export default function SettingsPage() {
 						</div>
 				</details>}
 
+					{/* Developer API Keys - collapsed by default */}
+			<details className="group">
+				<summary className="cursor-pointer list-none">
+					<LayerCard className="hover:ring-kumo-brand/30 transition-shadow">
+						<LayerCard.Secondary className="font-funky-mono tracking-tighter flex items-center justify-between">
+							<div className="flex items-center gap-2"><Key className="size-4" /><span>Developer — API Keys</span></div>
+							<span className="text-xs font-normal text-kumo-subtle group-open:hidden">Expand</span>
+							<span className="text-xs font-normal text-kumo-subtle hidden group-open:inline">Collapse</span>
+						</LayerCard.Secondary>
+						<LayerCard.Primary><p className="text-sm text-kumo-subtle">API keys let you use Masidy programmatically from your own code or CI/CD pipelines.</p></LayerCard.Primary>
+					</LayerCard>
+				</summary>
+				<div className="mt-2">
 					<LayerCard id="api-keys">
 						<LayerCard.Secondary className="font-funky-mono tracking-tighter">
 							<div className="flex items-center gap-2">
@@ -656,6 +669,8 @@ export default function SettingsPage() {
 							</div>
 						</LayerCard.Primary>
 					</LayerCard>
+				</div>
+			</details>
 
 					{/* Security Section */}
 					<LayerCard id="security">
