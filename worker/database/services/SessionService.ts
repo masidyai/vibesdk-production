@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Session Service for managing user sessions in D1
  * Provides session creation, validation, and cleanup
  */
@@ -6,7 +6,7 @@
 import { AuthSession } from '../../types/auth-types';
 import { SecurityError, SecurityErrorType } from 'shared/types/errors';
 import * as schema from '../schema';
-import { eq, and, lt, gt, desc, ne } from 'drizzle-orm';
+import { eq, and, lt, gt, desc, ne, or } from 'drizzle-orm';
 import { createLogger } from '../../logger';
 import { generateId } from '../../utils/idGenerator';
 import { JWTUtils } from '../../utils/jwtUtils';
@@ -30,7 +30,7 @@ interface SessionConfig {
  */
 export class SessionService extends BaseService {
     static readonly config: SessionConfig = {
-        maxSessions: 5,
+        maxSessions: 10,
         sessionTTL: 3 * 24 * 60 * 60,
         cleanupInterval: 60 * 60, // 1 hour
         maxConcurrentDevices: 3, // Max 3 devices concurrently
@@ -281,28 +281,44 @@ export class SessionService extends BaseService {
      */
     private async cleanupUserSessions(userId: string): Promise<void> {
         try {
-            // Get all sessions for user, ordered by last activity
-            const sessions = await this.db.db
+            const now = new Date();
+            // Step 1: Delete expired or revoked sessions — always safe to remove
+            await this.db.db
+                .delete(schema.sessions)
+                .where(
+                    and(
+                        eq(schema.sessions.userId, userId),
+                        or(
+                            eq(schema.sessions.isRevoked, true),
+                            lt(schema.sessions.expiresAt, now)
+                        )
+                    )
+                );
+
+            // Step 2: Enforce per-user cap on remaining VALID sessions
+            // Only delete valid sessions if we're still over the limit — this
+            // prevents wiping out a session the user's cookie is still pointing to.
+            const validSessions = await this.db.db
                 .select({ id: schema.sessions.id })
                 .from(schema.sessions)
-                .where(eq(schema.sessions.userId, userId))
+                .where(
+                    and(
+                        eq(schema.sessions.userId, userId),
+                        eq(schema.sessions.isRevoked, false),
+                        gt(schema.sessions.expiresAt, now)
+                    )
+                )
                 .orderBy(desc(schema.sessions.lastActivity))
                 .all();
-            
-            // Keep only the most recent sessions
-            if (sessions.length > SessionService.config.maxSessions) {
-                const sessionsToDelete = sessions.slice(SessionService.config.maxSessions);
-                
+
+            if (validSessions.length > SessionService.config.maxSessions) {
+                const sessionsToDelete = validSessions.slice(SessionService.config.maxSessions);
                 for (const session of sessionsToDelete) {
                     await this.db.db
                         .delete(schema.sessions)
                         .where(eq(schema.sessions.id, session.id));
                 }
-                
-                logger.debug('Cleaned up old user sessions', { 
-                    userId, 
-                    deleted: sessionsToDelete.length 
-                });
+                logger.debug('Cleaned up old user sessions', { userId, deleted: sessionsToDelete.length });
             }
         } catch (error) {
             logger.error('Error cleaning up user sessions', error);

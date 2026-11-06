@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Centralized Authentication Utilities
  */
 
@@ -185,7 +185,7 @@ export function createSecureCookie(options: CookieOptions): string {
 
 	const parts = [`${name}=${encodeURIComponent(value)}`];
 
-	if (maxAge > 0) parts.push(`Max-Age=${maxAge}`);
+ if (maxAge >= 0) parts.push("Max-Age=${maxAge}");
 	if (path) parts.push(`Path=${path}`);
 	if (domain) parts.push(`Domain=${domain}`);
 	if (secure) parts.push('Secure');
