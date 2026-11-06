@@ -86,9 +86,9 @@ export default function PricingPage() {
     return (
         <div className="min-h-screen bg-kumo-canvas">
             <title>Pricing - Masidy</title>
-            <main className="container mx-auto max-w-5xl px-4 py-16 pb-24">
+            <main className="container mx-auto max-w-5xl px-4 py-8 sm:py-16 pb-16 sm:pb-24">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold font-funky-mono text-kumo-strong mb-3">
+                    <h1 className="text-2xl sm:text-4xl font-bold font-funky-mono text-kumo-strong mb-3">
                         Simple, transparent pricing
                     </h1>
                     <p className="text-lg text-kumo-subtle max-w-xl mx-auto">

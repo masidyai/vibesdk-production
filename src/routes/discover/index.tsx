@@ -77,7 +77,7 @@ export default function DiscoverPage() {
 				>
 					{/* Header */}
 					<div className="mb-8 mt-6">
-						<h1 className="flex items-center gap-2 text-6xl font-funky-mono font-bold mb-3 text-brand-emphasis">
+						<h1 className="flex items-center gap-2 text-4xl sm:text-6xl font-funky-mono font-bold mb-3 text-brand-emphasis">
 							<BrandEmphasisIcon
 								icon={GlobeIcon}
 								weight="duotone"
@@ -85,12 +85,12 @@ export default function DiscoverPage() {
 							/>
 							Discover
 						</h1>
-						<p className="text-kumo-subtle text-lg font-funky-mono tracking-tight">
+						<p className="text-kumo-subtle text-base sm:text-lg font-funky-mono tracking-tight">
 							Explore apps built by the community
 						</p>
 					</div>
 
-					<div className="flex flex-wrap items-start gap-3 justify-between mb-8">
+					<div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-start gap-3 sm:justify-between mb-8">
 						{/* Search and Filters */}
 						<AppFiltersForm
 							searchQuery={searchQuery}

@@ -413,7 +413,7 @@ function ChatSession() {
 									onClick={() => window.open(cloudflareDeploymentUrl, '_blank', 'noopener,noreferrer')}
 								>
 									<ExternalLink className="size-3.5" />
-									View Live
+								<span className="hidden sm:inline">View Live</span>
 								</Button>
 							)}
 							<Button
@@ -432,7 +432,7 @@ function ChatSession() {
 									: cloudflareDeploymentUrl
 										? 'Redeploy'
 										: userAccountDeployEnabled
-											? 'Deploy to My Account'
+										? <><span className="hidden sm:inline">Deploy to My Account</span><span className="sm:hidden">Deploy</span></>
 											: 'Deploy'}
 							</Button>
 						</>
@@ -451,7 +451,7 @@ function ChatSession() {
 								/>
 							}
 						>
-							Make public
+						<span className="hidden sm:inline">Make public</span>
 						</Button>
 					)}
 					{isOwner && app?.visibility === 'public' && (
@@ -461,7 +461,7 @@ function ChatSession() {
 							onClick={() => navigate(`/app/${app.id}`)}
 							icon={<ExternalLink className="size-3.5" />}
 						>
-							View public preview
+						<span className="hidden sm:inline">View public preview</span>
 						</Button>
 					)}
 					{app && (

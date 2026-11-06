@@ -701,7 +701,7 @@ export default function AppView() {
 					</a>
 				</div>
 			)}
-			<div className="shrink-0 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-4 py-2 border-b bg-kumo-base">
+			<div className="shrink-0 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-3 sm:px-4 py-2 border-b bg-kumo-base overflow-x-auto">
 				<Tabs
 					value={activeTab}
 					onValueChange={setActiveTab}
@@ -758,7 +758,7 @@ export default function AppView() {
 									void handleFavorite();
 								}}
 							>
-								{isFavorited ? 'Bookmarked' : 'Bookmark'}
+								<span className="hidden sm:inline">{isFavorited ? 'Bookmarked' : 'Bookmark'}</span>
 							</Button>
 
 							<Button
@@ -772,7 +772,7 @@ export default function AppView() {
 								}
 								onClick={handleStar}
 							>
-								{isStarred ? 'Starred' : 'Star'}
+								<span className="hidden sm:inline">{isStarred ? 'Starred' : 'Star'}</span>
 								{(app.starCount || 0) > 0 && (
 									<span className="text-kumo-subtle tabular-nums">
 										{app.starCount}
@@ -790,7 +790,7 @@ export default function AppView() {
 						}
 						onClick={() => setIsGitCloneModalOpen(true)}
 					>
-						Clone
+						<span className="hidden sm:inline">Clone</span>
 					</Button>
 				</div>
 			</div>

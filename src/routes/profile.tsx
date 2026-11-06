@@ -173,7 +173,7 @@ export default function Profile() {
 					? `${user.displayName} - Profile - Masidy`
 					: 'Profile - Masidy'}
 			</title>
-			<main className="container mx-auto max-w-4xl px-4 py-12 pb-24">
+			<main className="container mx-auto max-w-4xl px-4 py-6 sm:py-12 pb-16 sm:pb-24">
 				{/* Header */}
 				<div className="mb-10 flex flex-col items-center gap-6 sm:flex-row sm:items-start">
 					<button type="button" className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()} title="Change avatar">
@@ -191,7 +191,7 @@ export default function Profile() {
 
 					<div className="min-w-0 flex-1 text-center sm:text-left">
 						<div className="mb-1.5 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
-							<h1 className="font-funky-mono text-2xl font-semibold text-kumo-strong">
+							<h1 className="font-funky-mono text-xl sm:text-2xl font-semibold text-kumo-strong">
 								{user?.displayName || 'Your profile'}
 							</h1>
 							<div className="flex flex-wrap items-center justify-center gap-1.5">

@@ -74,7 +74,7 @@ export default function AppsPage() {
 				>
 					{/* Header */}
 					<div className="mb-8">
-						<h1 className="text-6xl font-bold mb-3 font-funky-mono text-kumo-brand">
+						<h1 className="text-4xl sm:text-6xl font-bold mb-3 font-funky-mono text-kumo-brand">
 							MY APPS
 						</h1>
 						<p className="text-kumo-subtle text-lg">
@@ -92,7 +92,7 @@ export default function AppsPage() {
 							/>
 						</div>
 
-						<div className="flex items-start gap-4 justify-between">
+						<div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:justify-between">
 							{/* Search and Filters */}
 							<AppFiltersForm
 								searchQuery={searchQuery}
