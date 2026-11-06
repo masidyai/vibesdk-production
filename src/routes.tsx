@@ -1,4 +1,4 @@
-import type { RouteObject } from 'react-router';
+﻿import type { RouteObject } from 'react-router';
 
 import App from './App';
 import Home from './routes/home';
@@ -9,59 +9,69 @@ import AppsPage from './routes/apps';
 import AppView from './routes/app';
 import DiscoverPage from './routes/discover';
 import PricingPage from './routes/pricing';
+import TermsPage from './routes/terms';
+import PrivacyPage from './routes/privacy';
 import { ProtectedRoute } from './routes/protected-route';
 
 const routes = [
-	{
-		path: '/',
-		Component: App,
-		children: [
-			{
-				index: true,
-				Component: Home,
-			},
-			{
-				path: 'chat/:chatId',
-				Component: Chat,
-			},
-			{
-				path: 'profile',
-				element: (
-					<ProtectedRoute>
-						<Profile />
-					</ProtectedRoute>
-				),
-			},
-			{
-				path: 'settings',
-				element: (
-					<ProtectedRoute>
-						<Settings />
-					</ProtectedRoute>
-				),
-			},
-			{
-				path: 'apps',
-				element: (
-					<ProtectedRoute>
-						<AppsPage />
-					</ProtectedRoute>
-				),
-			},
-			{
-				path: 'app/:id',
-				Component: AppView,
-			},
-			{
-				path: 'discover',
-				Component: DiscoverPage,
-			},
-			{
-				path: 'pricing',
-				Component: PricingPage,
-			},
-		],
-	},
+{
+path: '/',
+Component: App,
+children: [
+{
+index: true,
+Component: Home,
+},
+{
+path: 'chat/:chatId',
+Component: Chat,
+},
+{
+path: 'profile',
+element: (
+<ProtectedRoute>
+<Profile />
+</ProtectedRoute>
+),
+},
+{
+path: 'settings',
+element: (
+<ProtectedRoute>
+<Settings />
+</ProtectedRoute>
+),
+},
+{
+path: 'apps',
+element: (
+<ProtectedRoute>
+<AppsPage />
+</ProtectedRoute>
+),
+},
+{
+path: 'app/:id',
+Component: AppView,
+},
+{
+path: 'discover',
+Component: DiscoverPage,
+},
+{
+path: 'pricing',
+Component: PricingPage,
+},
+{
+path: 'terms',
+Component: TermsPage,
+},
+{
+path: 'privacy',
+Component: PrivacyPage,
+},
+],
+},
 ] satisfies RouteObject[];
 
 export { routes };

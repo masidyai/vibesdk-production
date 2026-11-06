@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Enhanced Login Modal
  * Supports both OAuth and email/password authentication with backward compatibility
  */
@@ -198,15 +198,15 @@ export function LoginModal({
 
 	const title = actionContext
 		? `Sign in ${actionContext}`
-		: hasEmailAuth && mode === 'register'
-			? 'Create an account'
-			: 'Welcome back';
+		: mode === 'register'
+			? 'Create your account'
+			: 'Sign in to Masidy';
 
 	const description = actionContext
-		? 'Authentication required for this action'
-		: hasEmailAuth && mode === 'register'
-			? 'Join to start building amazing applications'
-			: 'Sign in to save your apps and access your workspace';
+		? 'Sign in or create an account to continue'
+		: mode === 'register'
+			? 'Start building apps with AI, free. No credit card needed.'
+			: 'Welcome back! Sign in to access your workspace.';
 
 	return (
 		<Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
@@ -496,7 +496,7 @@ export function LoginModal({
 								className="text-sm text-kumo-subtle hover:text-kumo-default transition-colors"
 							>
 								{mode === 'login'
-									? "Don't have an account? Sign up"
+									? "New to Masidy? Create a free account"
 									: 'Already have an account? Sign in'}
 							</button>
 						</div>
