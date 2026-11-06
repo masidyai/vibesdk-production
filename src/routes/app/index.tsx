@@ -348,11 +348,15 @@ export default function AppView() {
 	// Think prefers its live preview over the production deployment link. For
 	// signed-in viewers we withhold the deployed link until the preview resolves
 	// so the preview always wins; anonymous viewers fall back to it.
-	const appUrl = isThink
-		? user
-			? thinkPreviewUrl || ''
-			: app?.cloudflareUrl || app?.previewUrl || ''
-		: ownerPreviewUrl || app?.cloudflareUrl || app?.previewUrl || '';
+	// If the app has a stable published URL, use it for the preview iframe (no token required).
+	// Fall back to the space preview URL (which requires a token) only if not yet published.
+	const appUrl = app?.publishedUrl
+		? app.publishedUrl
+		: isThink
+			? user
+				? thinkPreviewUrl || ''
+				: app?.cloudflareUrl || app?.previewUrl || ''
+			: ownerPreviewUrl || app?.cloudflareUrl || app?.previewUrl || '';
 	const promptText = app?.agentSummary?.query || app?.originalPrompt || '';
 
 	const handleCopyUrl = () => {

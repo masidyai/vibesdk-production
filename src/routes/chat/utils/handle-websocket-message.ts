@@ -2,6 +2,22 @@ import type { WebSocket } from 'partysocket';
 import type { WebSocketMessage, BlueprintType, ConversationMessage, AgentState, PhasicState, BehaviorType, ProjectType, TemplateDetails, CloudflareDeploymentErrorCode } from '@/api-types';
 import { deduplicateMessages, isAssistantMessageDuplicate } from './deduplicate-messages';
 import { logger } from '@/utils/logger';
+
+/**
+ * Strip inline <think>...</think> reasoning blocks from text chunks.
+ * Some models (e.g. DeepSeek, Qwen) output reasoning inline in the text stream
+ * rather than in the structured reasoning channel. This prevents them from
+ * showing as raw tags in the chat UI.
+ */
+function stripInlineThinkTags(text: string): string {
+    // Remove complete <think>...</think> blocks
+    let result = text.replace(/<think>[\s\S]*?<\/think>/g, '');
+    // Remove opening <think> tag if the closing hasn't arrived yet (streaming)
+    result = result.replace(/<think>[\s\S]*$/, '');
+    // Remove orphaned </think> closing tags
+    result = result.replace(/<\/think>/g, '');
+    return result;
+}
 import { getFileType } from '@/utils/string';
 import { getPreviewUrl } from '@/lib/utils';
 import {
@@ -1052,15 +1068,17 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
 
                 if (message.isStreaming) {
                     const chunk = isArchive ? placeholder : message.message;
-                    if (chunk) {
-                        setMessages(prev => appendTextDelta(prev, conversationId, chunk));
+                    const cleanChunk = chunk ? stripInlineThinkTags(chunk) : chunk;
+                    if (cleanChunk) {
+                        setMessages(prev => appendTextDelta(prev, conversationId, cleanChunk));
                     }
                     break;
                 }
 
                 setMessages(prev => {
                     const idx = prev.findIndex(m => m.role === 'assistant' && m.conversationId === conversationId);
-                    const newContent = isArchive ? placeholder : message.message;
+                    const rawContent = isArchive ? placeholder : message.message;
+                    const newContent = rawContent ? stripInlineThinkTags(rawContent) : rawContent;
                     // Finalize an existing streamed turn: keep interleaved parts,
                     // only seed text when nothing streamed.
                     if (idx !== -1) return setAssistantText(prev, conversationId, newContent);
