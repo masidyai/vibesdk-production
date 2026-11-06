@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import {
 	useMutation,
@@ -39,6 +39,7 @@ import { queryKeys } from '@/lib/query-keys';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { CloudflareAccountSelector } from '@/components/cloudflare-account-selector';
 import { UsageCard } from '@/components/usage-card';
+import { useLimitsContext } from '@/contexts/limits-context';
 import { ConnectedAccounts } from '@/components/connected-accounts';
 import { BiohazardIcon, TrashIcon } from '@phosphor-icons/react';
 
@@ -255,6 +256,9 @@ export default function SettingsPage() {
 		finally { setPwLoading(false); }
 	};
 
+	const { data: limitsData } = useLimitsContext();
+	const cloudflareConnectEnabled = limitsData?.cloudflareConnectEnabled ?? true;
+
 	const handleRevokeSession = (sessionId: string) => {
 		revokeSessionMutation.mutate(sessionId);
 	};
@@ -293,8 +297,8 @@ export default function SettingsPage() {
 					</div>
 					<UsageCard />
 
-					{/* Advanced: own Cloudflare account */}
-					<details className="group">
+				{/* Advanced: own Cloudflare account — hidden when feature not configured */}
+				{cloudflareConnectEnabled && <details className="group">
 						<summary className="cursor-pointer list-none">
 							<LayerCard className="hover:ring-kumo-brand/30 transition-shadow">
 								<LayerCard.Secondary className="font-funky-mono tracking-tighter flex items-center justify-between">
@@ -310,7 +314,7 @@ export default function SettingsPage() {
 						<div className="mt-2">
 							<CloudflareAccountSelector />
 						</div>
-					</details>
+				</details>}
 
 					<LayerCard id="api-keys">
 						<LayerCard.Secondary className="font-funky-mono tracking-tighter">

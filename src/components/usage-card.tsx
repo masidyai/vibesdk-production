@@ -1,4 +1,4 @@
-/**
+﻿/**
  * UsageCard — shows current plan, builds used/remaining, and upgrade CTA.
  * Used in Settings page and profile.
  */
@@ -103,24 +103,39 @@ export function UsageCard() {
                         </div>
 
                         {plan === 'free' && (
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <Button
-                                    variant="primary"
-                                    size="sm"
-                                    onClick={() => handleUpgrade('pro')}
-                                    loading={upgrading}
-                                    className="gap-1.5"
-                                >
-                                    Upgrade to Pro <ArrowRight className="size-3.5" />
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => handleUpgrade('team')}
-                                    loading={upgrading}
-                                >
-                                    Team plan
-                                </Button>
+                            <div className="flex flex-col gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div className="rounded-lg ring-1 ring-kumo-line p-3 grid gap-2">
+                                        <div>
+                                            <p className="text-sm font-semibold text-kumo-default">Pro — $19/mo</p>
+                                            <p className="text-xs text-kumo-subtle mt-0.5">100 builds/month, custom domains, priority AI</p>
+                                        </div>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => handleUpgrade('pro')}
+                                            loading={upgrading}
+                                            className="gap-1.5 w-full"
+                                        >
+                                            Upgrade to Pro <ArrowRight className="size-3.5" />
+                                        </Button>
+                                    </div>
+                                    <div className="rounded-lg ring-1 ring-kumo-line p-3 grid gap-2">
+                                        <div>
+                                            <p className="text-sm font-semibold text-kumo-default">Team — $49/mo</p>
+                                            <p className="text-xs text-kumo-subtle mt-0.5">Unlimited builds, team workspaces, all Pro features</p>
+                                        </div>
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={() => handleUpgrade('team')}
+                                            loading={upgrading}
+                                            className="w-full"
+                                        >
+                                            Get Team plan
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
