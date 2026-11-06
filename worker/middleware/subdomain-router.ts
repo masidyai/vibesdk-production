@@ -33,11 +33,21 @@ if (!isDispatcherAvailable(env)) return null;
 
 try {
 const db = drizzle(env.DB, { schema });
-const app = await db
+// Check by slug first, then by deploymentId (for platform-deployed apps)
+let app = await db
 .select({ id: schema.apps.id, deploymentId: schema.apps.deploymentId, visibility: schema.apps.visibility })
 .from(schema.apps)
 .where(eq(schema.apps.slug, slug))
 .get();
+
+if (!app) {
+// Fall back to deploymentId match (platform deploy sets deploymentId = scriptName = subdomain)
+app = await db
+.select({ id: schema.apps.id, deploymentId: schema.apps.deploymentId, visibility: schema.apps.visibility })
+.from(schema.apps)
+.where(eq(schema.apps.deploymentId, slug))
+.get();
+}
 
 if (!app?.deploymentId) return new Response('App not found', { status: 404 });
 if (app.visibility !== 'public') return new Response('This app is private', { status: 403 });

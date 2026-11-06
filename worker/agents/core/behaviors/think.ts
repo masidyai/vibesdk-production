@@ -1031,7 +1031,14 @@ export class ThinkCodingBehavior
 				bundle,
 				enableAI: this.env.ENABLE_PLATFORM_AI_BINDING === 'true',
 			});
-			await new AppService(this.env).updateDeploymentId(instanceId, result.deploymentId);
+			const appService = new AppService(this.env);
+			await appService.updateDeploymentId(instanceId, result.deploymentId);
+			// Also set the slug so subdomain routing works: {slug}.masidy.dev
+			await appService.updateApp(instanceId, {
+				slug: result.deploymentId,
+				publishedUrl: result.deploymentUrl,
+				visibility: 'public',
+			});
 			this.setState({ ...this.state, cloudflareDeploymentUrl: result.deploymentUrl });
 			this.broadcast(WebSocketMessageResponses.CLOUDFLARE_DEPLOYMENT_COMPLETED, {
 				message: 'Successfully deployed to Cloudflare Workers',
