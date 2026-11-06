@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Usage Limit Checker
  * Validates usage limits before sending prompts and shows appropriate dialogs
  */
@@ -288,6 +288,39 @@ export function getDeployGateDialog(
 }
 
 /**
+ * Build limit dialog -- shown when monthly free build cap is reached.
+ */
+function createBuildLimitDialog(buildsUsed: number, buildsLimit: number, onClose: () => void): React.ReactElement {
+	return (
+		<Dialog open={true} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<div className="mb-2"><AlertCircle className="h-10 w-10 text-amber-500" /></div>
+					<DialogTitle className="text-xl">Monthly build limit reached</DialogTitle>
+					<DialogDescription className="pt-2 text-sm">
+						You&apos;ve used <strong>{buildsUsed} of {buildsLimit}</strong> free builds this month.
+						Upgrade to keep building.
+					</DialogDescription>
+				</DialogHeader>
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-3">
+					<div className="rounded-lg border p-3 grid gap-2">
+						<p className="text-sm font-semibold">Pro &mdash; \/mo</p>
+						<p className="text-xs text-muted-foreground">100 builds/month, custom domains</p>
+						<Button variant="default" size="sm" className="w-full" onClick={() => { window.location.href = '/pricing'; }}>Upgrade to Pro</Button>
+					</div>
+					<div className="rounded-lg border p-3 grid gap-2">
+						<p className="text-sm font-semibold">Team &mdash; \/mo</p>
+						<p className="text-xs text-muted-foreground">Unlimited builds, team workspaces</p>
+						<Button variant="outline" size="sm" className="w-full" onClick={() => { window.location.href = '/pricing'; }}>Get Team plan</Button>
+					</div>
+				</div>
+				<DialogFooter><Button variant="ghost" size="sm" onClick={onClose}>Maybe later</Button></DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+/**
  * Check if user can send a prompt and return appropriate dialog if blocked
  */
 export function checkCanSendPrompt(
@@ -302,6 +335,14 @@ export function checkCanSendPrompt(
 	}
 
 	const { limitCheck, hasUserToken, hasCloudflareConfigured, cloudflareCredits } = limitsData;
+
+	// Check build limit first -- hit monthly cap means upgrade needed
+	if (limitsData.buildUsage && !limitsData.buildUsage.withinLimits) {
+		return {
+			canProceed: false,
+			dialogComponent: createBuildLimitDialog(limitsData.buildUsage.buildsUsed, limitsData.buildUsage.buildsLimit, onClose),
+		};
+	}
 
 	// If within limits, allow proceed
 	if (limitCheck.withinLimits) {

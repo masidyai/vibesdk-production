@@ -92,7 +92,7 @@ import { queryKeys } from '@/lib/query-keys';
 import { ApiError } from '@/lib/api-client';
 import { capitalizeFirstLetter } from '@/lib/utils';
 import { usePageHeader } from '@/components/layout/header-context';
-import { CloudflareLogo } from '@/components/icons/logos';
+import { MasidyLogo } from '@/components/icons/MasidyLogo';
 
 const isPhasicBlueprint = (
 	blueprint?: BlueprintType | null,
@@ -425,7 +425,7 @@ function ChatSession() {
 								{isDeploying ? (
 									<LoaderCircle className="size-3.5 animate-spin" />
 								) : (
-									<CloudflareLogo className="size-3.5" />
+									<MasidyLogo className="size-3.5" />
 								)}
 								{isDeploying
 									? 'Deploying...'

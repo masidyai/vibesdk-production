@@ -1,10 +1,11 @@
-import { Connection } from 'agents';
+﻿import { Connection } from 'agents';
 import { createLogger } from '../../logger';
 import { WebSocketMessageRequests, WebSocketMessageResponses } from '../constants';
 import { WebSocketMessage, WebSocketMessageData, WebSocketMessageType } from '../../api/websocketTypes';
 import { MAX_IMAGES_PER_MESSAGE, MAX_IMAGE_SIZE_BYTES, type ImageAttachment } from '../../types/image-attachment';
 import { type CredentialsPayload } from '../inferutils/config.types';
 import { checkUsageAndBalance } from '../../services/rate-limit';
+import { UsageService } from '../../database/services/UsageService';
 import type { CodeGeneratorAgent } from './codingAgent';
 import type { DeploymentTarget } from './types';
 
@@ -223,6 +224,17 @@ export async function handleWebSocketMessage(
                     // upgrade time (see codingAgent.onConnect) and stored in DO state.
                     // WS frames do not carry cookies, so we rely on that snapshot.
                     const userToken = agent.state.cloudflareToken || null;
+                    // Check build limit before Cloudflare credits
+                    const usageService = new UsageService(env);
+                    const buildUsage = await usageService.getUserUsageSummary(userId);
+                    if (!buildUsage.withinLimits) {
+                        sendToConnection(connection, WebSocketMessageResponses.ERROR, {
+                            error: 'Monthly build limit reached (' + buildUsage.buildsUsed + '/' + buildUsage.buildsLimit + '). Upgrade your plan to continue building.',
+                            code: 'BUILD_LIMIT_EXCEEDED',
+                            showAsPopup: true,
+                        });
+                        return;
+                    }
 
                     // Check limits and balance (this may transparently refresh the token).
                     const wsOrigin = agent.state.wsOrigin || undefined;
