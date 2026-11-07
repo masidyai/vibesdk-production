@@ -77,7 +77,7 @@ export interface UsageSummary {
 buildUsage?: {
 buildsUsed: number;
 buildsLimit: number;
-plan: 'free' | 'pro' | 'team';
+plan: 'free' | 'pro' | 'team' | 'enterprise';
 periodStart: string;
 periodEnd: string;
 withinLimits: boolean;

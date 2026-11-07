@@ -661,13 +661,14 @@ export const customDomains = sqliteTable('custom_domains', {
 // PLANS & SUBSCRIPTIONS (Phase 4)
 // ========================================
 
-export const PLAN_VALUES = ['free', 'pro', 'team'] as const;
+export const PLAN_VALUES = ['free', 'pro', 'team', 'enterprise'] as const;
 export type Plan = typeof PLAN_VALUES[number];
 
 export const PLAN_BUILD_LIMITS: Record<Plan, number> = {
-    free: 10,
-    pro: 100,
-    team: Infinity,
+    free: 5,          // 5 credits/month
+    pro: 50,          // 50 credits/month
+    team: 200,        // 200 credits/month
+    enterprise: 1000, // 1000 credits/month
 };
 
 /**
@@ -676,7 +677,7 @@ export const PLAN_BUILD_LIMITS: Record<Plan, number> = {
 export const subscriptions = sqliteTable('subscriptions', {
     id: text('id').primaryKey(),
     userId: text('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
-    plan: text('plan', { enum: ['free', 'pro', 'team'] }).notNull().default('free'),
+    plan: text('plan', { enum: ['free', 'pro', 'team', 'enterprise'] }).notNull().default('free'),
     stripeCustomerId: text('stripe_customer_id'),
     stripeSubscriptionId: text('stripe_subscription_id'),
     status: text('status', { enum: ['active', 'canceled', 'past_due', 'trialing'] }).default('active'),

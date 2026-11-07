@@ -1422,7 +1422,7 @@ class ApiClient {
 		return this.request('/api/billing/plans', undefined, true);
 	}
 
-	async createCheckoutSession(plan: 'pro' | 'team'): Promise<ApiResponse<{ url: string }>> {
+	async createCheckoutSession(plan: 'pro' | 'team' | 'enterprise'): Promise<ApiResponse<{ url: string }>> {
 		return this.request('/api/billing/checkout', { method: 'POST', body: JSON.stringify({ plan }) });
 	}
 

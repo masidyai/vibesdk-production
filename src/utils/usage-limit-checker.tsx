@@ -293,28 +293,35 @@ export function getDeployGateDialog(
 function createBuildLimitDialog(buildsUsed: number, buildsLimit: number, onClose: () => void): React.ReactElement {
 	return (
 		<Dialog open={true} onOpenChange={onClose}>
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
 					<div className="mb-2"><AlertCircle className="h-10 w-10 text-amber-500" /></div>
-					<DialogTitle className="text-xl">Monthly build limit reached</DialogTitle>
+					<DialogTitle className="text-xl">You're out of credits this month</DialogTitle>
 					<DialogDescription className="pt-2 text-sm">
-						You&apos;ve used <strong>{buildsUsed} of {buildsLimit}</strong> free builds this month.
-						Upgrade to keep building.
+						You've used <strong>{buildsUsed} of {buildsLimit}</strong> credits.
+						Upgrade to keep building &mdash; all plans include every feature.
 					</DialogDescription>
 				</DialogHeader>
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-3">
-					<div className="rounded-lg border p-3 grid gap-2">
-						<p className="text-sm font-semibold">Pro &mdash; \/mo</p>
-						<p className="text-xs text-muted-foreground">100 builds/month, custom domains</p>
+				<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-3">
+					<div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+						<p className="text-sm font-semibold">Pro &mdash; $19/mo</p>
+						<p className="text-xs text-kumo-subtle">50 credits/month</p>
 						<Button variant="default" size="sm" className="w-full" onClick={() => { window.location.href = '/pricing'; }}>Upgrade to Pro</Button>
 					</div>
-					<div className="rounded-lg border p-3 grid gap-2">
-						<p className="text-sm font-semibold">Team &mdash; \/mo</p>
-						<p className="text-xs text-muted-foreground">Unlimited builds, team workspaces</p>
-						<Button variant="outline" size="sm" className="w-full" onClick={() => { window.location.href = '/pricing'; }}>Get Team plan</Button>
+					<div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+						<p className="text-sm font-semibold">Team &mdash; $49/mo</p>
+						<p className="text-xs text-kumo-subtle">200 credits/month</p>
+						<Button variant="outline" size="sm" className="w-full" onClick={() => { window.location.href = '/pricing'; }}>Get Team</Button>
+					</div>
+					<div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+						<p className="text-sm font-semibold">Enterprise &mdash; $199/mo</p>
+						<p className="text-xs text-kumo-subtle">1,000 credits/month</p>
+						<Button variant="outline" size="sm" className="w-full" onClick={() => { window.location.href = '/pricing'; }}>Get Enterprise</Button>
 					</div>
 				</div>
-				<DialogFooter><Button variant="ghost" size="sm" onClick={onClose}>Maybe later</Button></DialogFooter>
+				<DialogFooter>
+					<Button variant="ghost" size="sm" onClick={onClose}>Maybe later</Button>
+				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);

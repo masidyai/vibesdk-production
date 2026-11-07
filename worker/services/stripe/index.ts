@@ -6,7 +6,7 @@
 export interface StripeCheckoutParams {
     userId: string;
     email: string;
-    plan: 'pro' | 'team';
+    plan: 'pro' | 'team' | 'enterprise';
     successUrl: string;
     cancelUrl: string;
 }
@@ -43,10 +43,15 @@ export class StripeService {
     }
 
     // Price IDs keyed by plan — set via env vars
-    static getPriceId(env: { STRIPE_PRO_PRICE_ID?: string; STRIPE_TEAM_PRICE_ID?: string }, plan: 'pro' | 'team'): string {
-        return plan === 'pro'
-            ? (env.STRIPE_PRO_PRICE_ID ?? '')
-            : (env.STRIPE_TEAM_PRICE_ID ?? '');
+    static getPriceId(
+        env: { STRIPE_PRO_PRICE_ID?: string; STRIPE_TEAM_PRICE_ID?: string; STRIPE_ENTERPRISE_PRICE_ID?: string },
+        plan: 'pro' | 'team' | 'enterprise',
+    ): string {
+        switch (plan) {
+            case 'pro': return env.STRIPE_PRO_PRICE_ID ?? '';
+            case 'team': return env.STRIPE_TEAM_PRICE_ID ?? '';
+            case 'enterprise': return env.STRIPE_ENTERPRISE_PRICE_ID ?? '';
+        }
     }
 
     async createCheckoutSession(params: StripeCheckoutParams & {

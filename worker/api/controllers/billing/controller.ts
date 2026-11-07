@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Billing Controller — Stripe checkout + portal + plan management.
  */
 import { BaseController } from '../baseController';
@@ -26,15 +26,22 @@ export class BillingController extends BaseController {
                     id: 'pro',
                     name: 'Pro',
                     price: 19,
-                    buildsPerMonth: 100,
+                    buildsPerMonth: 50,
                     features: ['100 builds/month', 'Custom domain', 'Priority AI', 'Email support'],
                 },
                 {
                     id: 'team',
                     name: 'Team',
                     price: 49,
-                    buildsPerMonth: null,
-                    features: ['Unlimited builds', 'Custom domain', 'Team workspaces', 'Priority support'],
+                    buildsPerMonth: 200,
+                    features: ['200 credits/month', 'Custom domains (10)', 'Team workspaces', 'Priority support'],
+                },
+                {
+                    id: 'enterprise',
+                    name: 'Enterprise',
+                    price: 199,
+                    buildsPerMonth: 1000,
+                    features: ['1,000 credits/month', 'Unlimited custom domains', 'Dedicated support'],
                 },
             ],
         });
@@ -52,7 +59,7 @@ export class BillingController extends BaseController {
         const body = await BillingController.parseJsonBody<{ plan?: string }>(request);
         if (!body.success) return body.response!;
         const plan = body.data?.plan;
-        if (plan !== 'pro' && plan !== 'team') {
+        if (plan !== 'pro' && plan !== 'team' && plan !== 'enterprise') {
             return BillingController.createErrorResponse('Invalid plan. Must be "pro" or "team"', 400);
         }
 
@@ -62,7 +69,7 @@ export class BillingController extends BaseController {
 
         const origin = new URL(request.url).origin;
         const priceId = StripeService.getPriceId(
-            env as { STRIPE_PRO_PRICE_ID?: string; STRIPE_TEAM_PRICE_ID?: string },
+            env as { STRIPE_PRO_PRICE_ID?: string; STRIPE_TEAM_PRICE_ID?: string; STRIPE_ENTERPRISE_PRICE_ID?: string },
             plan,
         );
 
@@ -114,7 +121,7 @@ export class BillingController extends BaseController {
             if (event.type === 'checkout.session.completed' || event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
                 const metadata = (obj.metadata ?? (obj.subscription_data as Record<string, unknown>)?.metadata ?? {}) as Record<string, string>;
                 const userId = metadata.userId ?? (obj.client_reference_id as string | undefined);
-                const plan = (metadata.plan ?? 'free') as 'free' | 'pro' | 'team';
+                const plan = (metadata.plan ?? 'free') as 'free' | 'pro' | 'team' | 'enterprise';
 
                 if (userId) {
                     const subService = new SubscriptionService(env);

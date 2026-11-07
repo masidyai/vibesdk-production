@@ -7,14 +7,15 @@ import { useLimitsContext } from '@/contexts/limits-context';
 import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { Zap, ArrowRight } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
-const PLAN_NAMES = { free: 'Free', pro: 'Pro', team: 'Team' } as const;
-const PLAN_COLORS = {
+const PLAN_NAMES: Record<string, string> = { free: 'Free', pro: 'Pro', team: 'Team', enterprise: 'Enterprise' };
+const PLAN_COLORS: Record<string, string> = {
     free: 'bg-kumo-tint text-kumo-default',
     pro: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300',
     team: 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300',
-} as const;
+    enterprise: 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300',
+};
 
 export function UsageCard() {
     const { data, loading } = useLimitsContext();
@@ -28,7 +29,7 @@ export function UsageCard() {
     const isUnlimited = buildsLimit >= 999999;
     const pct = isUnlimited ? 0 : Math.min(100, Math.round((buildsUsed / buildsLimit) * 100));
 
-    const handleUpgrade = async (targetPlan: 'pro' | 'team') => {
+    const handleUpgrade = async (targetPlan: 'pro' | 'team' | 'enterprise') => {
         setUpgrading(true);
         try {
             const res = await apiClient.createCheckoutSession(targetPlan);
@@ -103,42 +104,45 @@ export function UsageCard() {
                         </div>
 
                         {plan === 'free' && (
-                            <div className="flex flex-col gap-3">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <div className="rounded-lg ring-1 ring-kumo-line p-3 grid gap-2">
-                                        <div>
-                                            <p className="text-sm font-semibold text-kumo-default">Pro — $19/mo</p>
-                                            <p className="text-xs text-kumo-subtle mt-0.5">100 builds/month, custom domains, priority AI</p>
-                                        </div>
-                                        <Button
-                                            variant="primary"
-                                            size="sm"
-                                            onClick={() => handleUpgrade('pro')}
-                                            loading={upgrading}
-                                            className="gap-1.5 w-full"
-                                        >
-                                            Upgrade to Pro <ArrowRight className="size-3.5" />
-                                        </Button>
-                                    </div>
-                                    <div className="rounded-lg ring-1 ring-kumo-line p-3 grid gap-2">
-                                        <div>
-                                            <p className="text-sm font-semibold text-kumo-default">Team — $49/mo</p>
-                                            <p className="text-xs text-kumo-subtle mt-0.5">Unlimited builds, team workspaces, all Pro features</p>
-                                        </div>
-                                        <Button
-                                            variant="secondary"
-                                            size="sm"
-                                            onClick={() => handleUpgrade('team')}
-                                            loading={upgrading}
-                                            className="w-full"
-                                        >
-                                            Get Team plan
-                                        </Button>
-                                    </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+                                    <p className="text-sm font-semibold">Pro — $19/mo</p>
+                                    <p className="text-xs text-kumo-subtle">50 credits/month</p>
+                                    <Button variant="primary" size="sm" onClick={() => handleUpgrade('pro')} loading={upgrading} className="w-full">Upgrade to Pro</Button>
+                                </div>
+                                <div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+                                    <p className="text-sm font-semibold">Team — $49/mo</p>
+                                    <p className="text-xs text-kumo-subtle">200 credits/month</p>
+                                    <Button variant="secondary" size="sm" onClick={() => handleUpgrade('team')} loading={upgrading} className="w-full">Get Team</Button>
+                                </div>
+                                <div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+                                    <p className="text-sm font-semibold">Enterprise — $199/mo</p>
+                                    <p className="text-xs text-kumo-subtle">1,000 credits/month</p>
+                                    <Button variant="secondary" size="sm" onClick={() => handleUpgrade('enterprise')} loading={upgrading} className="w-full">Get Enterprise</Button>
                                 </div>
                             </div>
                         )}
-
+                        {plan === 'pro' && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+                                    <p className="text-sm font-semibold">Team — $49/mo</p>
+                                    <p className="text-xs text-kumo-subtle">200 credits/month</p>
+                                    <Button variant="primary" size="sm" onClick={() => handleUpgrade('team')} loading={upgrading} className="w-full">Upgrade to Team</Button>
+                                </div>
+                                <div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+                                    <p className="text-sm font-semibold">Enterprise — $199/mo</p>
+                                    <p className="text-xs text-kumo-subtle">1,000 credits/month</p>
+                                    <Button variant="secondary" size="sm" onClick={() => handleUpgrade('enterprise')} loading={upgrading} className="w-full">Get Enterprise</Button>
+                                </div>
+                            </div>
+                        )}
+                        {plan === 'team' && (
+                            <div className="rounded-lg border border-kumo-line p-3 grid gap-1.5">
+                                <p className="text-sm font-semibold">Enterprise — $199/mo</p>
+                                <p className="text-xs text-kumo-subtle">1,000 credits/month — for power teams</p>
+                                <Button variant="primary" size="sm" onClick={() => handleUpgrade('enterprise')} loading={upgrading} className="w-full">Upgrade to Enterprise</Button>
+                            </div>
+                        )}
                         {plan !== 'free' && (
                             <div>
                                 <Button variant="secondary" size="sm" onClick={handleManage} loading={upgrading}>
