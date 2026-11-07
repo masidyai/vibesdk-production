@@ -1,5 +1,14 @@
 ﻿import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
-import { ArrowUpRight, Loader2 } from 'lucide-react';
+import {
+	ArrowRight,
+	ArrowUpRight,
+	Check,
+	Code2,
+	Globe2,
+	Loader2,
+	Rocket,
+	Sparkles,
+} from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useAuth } from '@/contexts/auth-context';
 import {
@@ -17,7 +26,7 @@ import { useAuthGuard } from '../hooks/useAuthGuard';
 import { usePaginatedApps } from '@/hooks/use-paginated-apps';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { AppCard } from '@/components/shared/AppCard';
-import { LinkButton, cn } from '@cloudflare/kumo';
+import { LinkButton } from '@cloudflare/kumo';
 import { useImageUpload } from '@/hooks/use-image-upload';
 import { useDragDrop } from '@/hooks/use-drag-drop';
 import { toast } from 'sonner';
@@ -40,6 +49,7 @@ export default function Home() {
 		useLimitsContext();
 	const [showLimitDialog, setShowLimitDialog] =
 		useState<React.ReactElement | null>(null);
+	const promptRef = useRef<HTMLDivElement>(null);
 
 	const handleConnectCloudflare = useCallback(() => {
 		void startCloudflareConnect(window.location.href);
@@ -108,19 +118,37 @@ export default function Home() {
 		[],
 	);
 
-	const { apps, loading } = usePaginatedApps({
+	const { apps, loading, error: appsError } = usePaginatedApps({
 		type: 'public',
 		defaultSort: 'trending',
 		defaultPeriod: 'week',
 		limit: 24,
 	});
 
-	// Discover section should appear only when enough apps are available and loading is done
-	const discoverReady = useMemo(
-		() => !loading && (apps?.length ?? 0) > 0,
-		[loading, apps],
-	);
 	const discoverApps = useMemo(() => (apps ?? []).slice(0, 9), [apps]);
+	const starterIdeas = [
+		{
+			title: 'A storefront for handmade goods',
+			category: 'E-commerce',
+			tone: 'apricot',
+			prompt:
+				'Build a warm, modern storefront for a handmade ceramics brand with a product grid and an about page.',
+		},
+		{
+			title: 'A dashboard for your next big idea',
+			category: 'Dashboard',
+			tone: 'blue',
+			prompt:
+				'Create a polished project dashboard with a sidebar, task overview, and progress charts.',
+		},
+		{
+			title: 'A home for your creative work',
+			category: 'Portfolio',
+			tone: 'violet',
+			prompt:
+				'Design a bold portfolio website for a creative studio with a project gallery and contact section.',
+		},
+	];
 
 	const handleCreateApp = (query: string, mode: ProjectType) => {
 		if (query.length > MAX_AGENT_QUERY_LENGTH) {
@@ -184,79 +212,133 @@ export default function Home() {
 	const discoverLinkRef = useRef<HTMLDivElement>(null);
 
 	return (
-		<div className="relative flex flex-col items-center w-full min-h-full">
+		<div className="home-page relative flex flex-col items-center w-full min-h-full">
 			<title>Masidy</title>
 			<div className="home-atmosphere" aria-hidden>
 				<div className="home-atmosphere__spotlight" />
 			</div>
 			<LayoutGroup>
-				<div className="w-full max-w-3xl px-5 sm:px-6">
-					<motion.div
-						layout
-						transition={{
-							layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-						}}
-						className={cn(
-							'flex flex-col items-stretch z-10 w-full',
-							discoverReady
-								? 'mt-28 sm:mt-36'
-								: 'mt-[18vh] sm:mt-[22vh] md:mt-[26vh]',
-						)}
+				<section className="home-hero relative z-10 w-full">
+					<div className="home-hero__copy">
+						<div className="home-eyebrow">
+							<Sparkles aria-hidden="true" />
+							<span>Your idea, made real</span>
+						</div>
+						<h1>
+							From first idea
+							<br />
+							to <span>something real.</span>
+						</h1>
+						<p className="home-hero__description">
+							Describe what you want to make. Masidy builds your app
+							and gets it ready to share.
+						</p>
+						<div ref={promptRef} className="home-prompt">
+							<PromptBox
+								value={query}
+								onChange={setQuery}
+								onSubmit={() => handleCreateApp(query, projectMode)}
+								placeholder="Create a "
+								animatedPlaceholder
+								placeholderPhrases={placeholderPhrases}
+								images={images}
+								onAddImages={addImages}
+								onRemoveImage={removeImage}
+								isProcessing={
+									isProcessing ||
+									(user ? usageLimitsLoading : false)
+								}
+								isDragging={isDragging}
+								dragHandlers={dragHandlers}
+								submitDisabled={user ? usageLimitsLoading : false}
+								limitsData={user ? limitsData : undefined}
+								onConnectCloudflare={handleConnectCloudflare}
+								variant="expanded"
+								submitIcon={
+									user && usageLimitsLoading ? (
+										<Loader2 className="animate-spin" />
+									) : (
+										<PaperPlaneTiltIcon weight="duotone" />
+									)
+								}
+								leftActions={
+									showModeSelector ? (
+										<ProjectModeSelector
+											value={projectMode}
+											onChange={setProjectMode}
+											modes={modeOptions}
+										/>
+									) : undefined
+								}
+							/>
+							<div className="home-prompt__footnote">
+								<span><Check aria-hidden="true" /> Free to start</span>
+								<span>No credit card</span>
+								<span>Deploy when you’re ready</span>
+							</div>
+						</div>
+						<div className="home-ideas" aria-label="Starter ideas">
+							<span>NEED A STARTING POINT?</span>
+							<div>
+								{starterIdeas.map((idea) => (
+									<button
+										key={idea.category}
+										type="button"
+										onClick={() => setQuery(idea.prompt)}
+									>
+										{idea.category}
+										<ArrowUpRight aria-hidden="true" />
+									</button>
+								))}
+							</div>
+						</div>
+					</div>
+
+					<div
+						className="home-hero__visual"
+						role="img"
+						aria-label="Illustrative storefront preview for a handmade home goods shop"
 					>
-						<div className="mb-6 sm:mb-7 grid gap-2.5">
-<h1 className="w-full text-center text-[clamp(2rem,5.5vw,3.25rem)] font-bold leading-[1.1] tracking-tight text-kumo-strong z-20">
-What will you{' '}
-<span className="font-funky-mono font-black text-[1.05em] tracking-tighter uppercase text-brand-emphasis">
-build
-</span>{' '}
-today?
-</h1>
-<p className="text-center text-sm sm:text-base text-kumo-subtle max-w-md mx-auto leading-relaxed">
-Describe it in plain English. Masidy writes the code and deploys it live — in minutes.
-</p>
-<p className="text-center text-xs text-kumo-subtle/50 mt-0.5 tracking-wide">
-Free to start &nbsp;&middot;&nbsp; No credit card &nbsp;&middot;&nbsp; Deploy in seconds
-</p>
-</div>
-						<PromptBox
-							value={query}
-							onChange={setQuery}
-							onSubmit={() => handleCreateApp(query, projectMode)}
-							placeholder="Create a "
-							animatedPlaceholder
-							placeholderPhrases={placeholderPhrases}
-							images={images}
-							onAddImages={addImages}
-							onRemoveImage={removeImage}
-							isProcessing={
-								isProcessing ||
-								(user ? usageLimitsLoading : false)
-							}
-							isDragging={isDragging}
-							dragHandlers={dragHandlers}
-							submitDisabled={user ? usageLimitsLoading : false}
-							limitsData={user ? limitsData : undefined}
-							onConnectCloudflare={handleConnectCloudflare}
-							variant="expanded"
-							submitIcon={
-								user && usageLimitsLoading ? (
-									<Loader2 className="animate-spin" />
-								) : (
-									<PaperPlaneTiltIcon weight="duotone" />
-								)
-							}
-							leftActions={
-								showModeSelector ? (
-									<ProjectModeSelector
-										value={projectMode}
-										onChange={setProjectMode}
-										modes={modeOptions}
-									/>
-								) : undefined
-							}
-						/>
-					</motion.div>
-				</div>
+						<div className="home-preview">
+							<div className="home-preview__bar">
+								<div className="home-preview__dots" aria-hidden="true">
+									<i /><i /><i />
+								</div>
+								<span>your-next-idea.masidy.app</span>
+								<div className="home-preview__live"><i /> PREVIEW</div>
+							</div>
+							<div className="home-preview__site">
+								<div className="home-preview__nav">
+									<b>FORME<span>.</span></b>
+									<div><i /><i /><i /></div>
+									<strong>SHOP THE EDIT <ArrowRight aria-hidden="true" /></strong>
+								</div>
+								<div className="home-preview__main">
+									<div className="home-preview__headline">
+										<span>OBJECTS FOR SLOW LIVING</span>
+										<strong>Make room<br />for <em>beautiful.</em></strong>
+										<p>Considered pieces for the everyday rituals that make a home.</p>
+										<button type="button" tabIndex={-1}>EXPLORE THE COLLECTION <ArrowUpRight aria-hidden="true" /></button>
+									</div>
+									<div className="home-preview__objects" aria-hidden="true">
+										<div className="home-object home-object--vase"><i /></div>
+										<div className="home-object home-object--bowl"><i /></div>
+										<div className="home-preview__caption">01 / THE SUNDAY COLLECTION</div>
+									</div>
+								</div>
+								<div className="home-preview__bottom">
+									<span>DESIGNED TO FEEL LIKE HOME</span>
+									<span>SCROLL TO DISCOVER ↓</span>
+								</div>
+							</div>
+						</div>
+						<div className="home-preview-note">
+							<div className="home-preview-note__icon"><Sparkles aria-hidden="true" /></div>
+							<div><strong>A little idea goes a long way</strong><span>A sample of what you can create with Masidy</span></div>
+						</div>
+						<div className="home-hero__glow" aria-hidden="true" />
+					</div>
+				</section>
 
 				<AnimatePresence mode="popLayout">
 					{images.length > 0 && (
@@ -288,67 +370,134 @@ Free to start &nbsp;&middot;&nbsp; No credit card &nbsp;&middot;&nbsp; Deploy in
 					)}
 				</AnimatePresence>
 
-				<AnimatePresence>
-					{discoverReady && (
-						<motion.section
-							key="discover-section"
+				<section className="home-how relative z-10">
+					<div className="home-section-heading">
+						<span>FROM IDEA TO LIVE</span>
+						<h2>Less setup. More <em>making.</em></h2>
+						<p>Go from a rough thought to something you can actually use.</p>
+					</div>
+					<div className="home-steps">
+						<article>
+							<div className="home-step-icon"><Sparkles aria-hidden="true" /></div>
+							<span>01 / DESCRIBE</span>
+							<h3>Start with a sentence.</h3>
+							<p>Tell Masidy what you have in mind. Add a reference image if you have one.</p>
+						</article>
+						<article>
+							<div className="home-step-icon"><Code2 aria-hidden="true" /></div>
+							<span>02 / BUILD</span>
+							<h3>Shape it as you go.</h3>
+							<p>Watch your idea take form, then ask for changes until it feels right.</p>
+						</article>
+						<article>
+							<div className="home-step-icon"><Globe2 aria-hidden="true" /></div>
+							<span>03 / SHARE</span>
+							<h3>Put it out there.</h3>
+							<p>Deploy your finished project and share it with the world.</p>
+						</article>
+					</div>
+				</section>
+
+				<section className="home-showcase relative z-10">
+					<div className="home-showcase__heading">
+						<div className="home-section-heading">
+							<span>{discoverApps.length ? 'MADE WITH MASIDY' : 'START WITH A CONCEPT'}</span>
+							<h2>
+								{discoverApps.length ? (
+									<>Good ideas look <em>good.</em></>
+								) : (
+									<>A little inspiration goes a <em>long way.</em></>
+								)}
+							</h2>
+							<p>
+								{discoverApps.length
+									? 'Explore what people are creating—or use these ideas to start your own.'
+									: 'Choose a direction, then make it yours with Masidy.'}
+							</p>
+						</div>
+						<div ref={discoverLinkRef}>
+							<LinkButton variant="outline" size="sm" href="/discover">
+								Explore projects
+								<ArrowUpRight className="size-3.5 opacity-70" />
+							</LinkButton>
+						</div>
+					</div>
+					{discoverApps.length > 0 ? (
+						<motion.div
 							layout
-							initial={{ opacity: 0, height: 0 }}
-							animate={{ opacity: 1, height: 'auto' }}
-							exit={{ opacity: 0, height: 0 }}
-							transition={{
-								duration: 0.5,
-								ease: [0.22, 1, 0.36, 1],
-							}}
-							className={cn(
-								'w-full max-w-5xl mx-auto px-5 sm:px-6 z-10',
-								images.length > 0
-									? 'mt-10'
-									: 'mt-16 sm:mt-20 mb-12',
-							)}
+							transition={{ duration: 0.4 }}
+							className="home-showcase__grid"
 						>
-							<div className="flex flex-col gap-6">
-								<div className="flex items-end justify-between gap-4">
-									<div className="grid gap-1.5 min-w-0">
-										<h2 className="text-xl sm:text-2xl font-semibold text-kumo-default/90">
-											Discover apps from the community
-										</h2>
-									</div>
-									<div ref={discoverLinkRef}>
-										<LinkButton
-											variant="outline"
-											size="sm"
-											href="/discover"
-										>
-											View all
-											<ArrowUpRight className="size-3.5 opacity-70" />
-										</LinkButton>
-									</div>
-								</div>
-								<motion.div
-									layout
-									transition={{ duration: 0.4 }}
-									className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-								>
-									<AnimatePresence mode="popLayout">
-										{discoverApps.map((app) => (
-											<AppCard
-												key={app.id}
-												app={app}
-												onClick={() =>
-													navigate(`/app/${app.id}`)
-												}
-												showStats={true}
-												showUser={true}
-												showActions={false}
-											/>
-										))}
-									</AnimatePresence>
-								</motion.div>
+							<AnimatePresence mode="popLayout">
+								{discoverApps.slice(0, 6).map((app) => (
+									<AppCard
+										key={app.id}
+										app={app}
+										onClick={() => navigate(`/app/${app.id}`)}
+										showStats
+										showUser
+										showActions={false}
+									/>
+								))}
+							</AnimatePresence>
+						</motion.div>
+					) : (
+						<>
+							<p className="home-showcase__notice">
+								{appsError
+									? 'Community projects are temporarily unavailable. Here are a few ideas to get you started.'
+									: loading
+										? 'Loading community projects… Here are a few ideas while you wait.'
+										: 'These are starting points, not templates—Masidy will shape them around your idea.'}
+							</p>
+							<div className="home-idea-cards">
+								{starterIdeas.map((idea, index) => (
+									<button
+										key={idea.category}
+										type="button"
+										className="home-idea-card"
+										onClick={() => {
+											setQuery(idea.prompt);
+											window.scrollTo({ top: 0, behavior: 'smooth' });
+										}}
+									>
+										<div className={`home-idea-card__art home-idea-card__art--${idea.tone}`}>
+											<div className="home-idea-card__window">
+												<span>{idea.category.toUpperCase()}</span>
+												<strong>{index === 0 ? 'made for' : index === 1 ? 'move with' : 'made to'}<br /><em>{index === 0 ? 'everyday.' : index === 1 ? 'intention.' : 'stand out.'}</em></strong>
+												<i /><i /><i />
+											</div>
+										</div>
+										<span className="home-idea-card__meta">{idea.category}<ArrowUpRight aria-hidden="true" /></span>
+										<strong>{idea.title}</strong>
+									</button>
+								))}
 							</div>
-						</motion.section>
+						</>
 					)}
-				</AnimatePresence>
+					{!discoverApps.length && loading && (
+						<div className="home-showcase__loading">Finding projects to inspire you…</div>
+					)}
+				</section>
+
+				<section className="home-cta relative z-10">
+					<div>
+						<span><Rocket aria-hidden="true" /> YOUR NEXT PROJECT STARTS HERE</span>
+						<h2>Make something<br /><em>you’re proud of.</em></h2>
+						<p>No blank canvas required. Just bring the idea.</p>
+					</div>
+					<button
+						type="button"
+						onClick={() =>
+							promptRef.current?.scrollIntoView({
+								behavior: 'smooth',
+								block: 'center',
+							})
+						}
+					>
+						Start creating <ArrowRight aria-hidden="true" />
+					</button>
+				</section>
 			</LayoutGroup>
 
 			{/* Usage limit dialogs */}
