@@ -966,4 +966,44 @@ export class AuthController extends BaseController {
             });
         }
     }
+    /**
+     * POST /api/auth/forgot-password
+     * Accepts an email, generates a reset token, sends the email. Always 200.
+     */
+    static async forgotPassword(request: Request, env: Env, _ctx: ExecutionContext, _routeContext: RouteContext): Promise<Response> {
+        try {
+            const bodyResult = await AuthController.parseJsonBody<{ email?: string }>(request);
+            if (!bodyResult.success) return bodyResult.response!;
+            const email = (bodyResult.data as { email?: string }).email?.trim();
+            if (!email) return AuthController.createErrorResponse('Email is required', 400);
+
+            const baseUrl = new URL(request.url).origin;
+            const authService = new AuthService(env);
+            await authService.forgotPassword(email, request, baseUrl);
+            // Always return 200 to avoid email enumeration
+            return AuthController.createSuccessResponse({ message: 'If an account with that email exists, a reset link has been sent.' });
+        } catch (error) {
+            return AuthController.handleError(error, 'forgot password');
+        }
+    }
+
+    /**
+     * POST /api/auth/reset-password
+     * Consumes the reset token and sets the new password.
+     */
+    static async resetPassword(request: Request, env: Env, _ctx: ExecutionContext, _routeContext: RouteContext): Promise<Response> {
+        try {
+            const bodyResult = await AuthController.parseJsonBody<{ token?: string; password?: string }>(request);
+            if (!bodyResult.success) return bodyResult.response!;
+            const { token, password } = bodyResult.data as { token?: string; password?: string };
+            if (!token || !password) return AuthController.createErrorResponse('Token and password are required', 400);
+
+            const authService = new AuthService(env);
+            await authService.resetPassword(token, password, request);
+            return AuthController.createSuccessResponse({ message: 'Password reset successfully. You can now sign in.' });
+        } catch (error) {
+            return AuthController.handleError(error, 'reset password');
+        }
+    }
+
 }

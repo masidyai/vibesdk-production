@@ -66,6 +66,19 @@ export function LoginModal({
 	showCloseButton = true,
 }: LoginModalProps) {
 	const { authProviders, hasOAuth } = useAuth();
+	const [forgotSent, setForgotSent] = useState(false);
+	const [forgotLoading, setForgotLoading] = useState(false);
+
+	const handleForgotPassword = async () => {
+		if (forgotLoading) return;
+		setForgotLoading(true);
+		try {
+			const { apiClient } = await import('@/lib/api-client');
+			await apiClient.forgotPassword(email.trim());
+		} catch { /* silent */ }
+		setForgotSent(true);
+		setForgotLoading(false);
+	};
 	const [mode, setMode] = useState<AuthMode>('login');
 	const [showPassword, setShowPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
@@ -477,6 +490,17 @@ export function LoginModal({
 										? 'Create account'
 										: 'Sign in'}
 							</OrangeButton>
+					{mode === 'login' && (
+						<div className="text-center mt-1">
+							{forgotSent ? (
+								<p className="text-xs text-kumo-subtle">Check your email for a reset link.</p>
+							) : (
+								<button type="button" onClick={handleForgotPassword} disabled={forgotLoading || !email.trim()} className="text-xs text-kumo-subtle hover:text-kumo-default transition-colors disabled:opacity-40">
+									{forgotLoading ? 'Sending...' : 'Forgot password?'}
+								</button>
+							)}
+						</div>
+					)}
 						</form>
 					)}
 				</div>

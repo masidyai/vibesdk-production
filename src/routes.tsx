@@ -11,6 +11,7 @@ import DiscoverPage from './routes/discover';
 import PricingPage from './routes/pricing';
 import TermsPage from './routes/terms';
 import PrivacyPage from './routes/privacy';
+import ResetPasswordPage from './routes/reset-password';
 import { ProtectedRoute } from './routes/protected-route';
 
 const routes = [
@@ -18,58 +19,26 @@ const routes = [
 path: '/',
 Component: App,
 children: [
-{
-index: true,
-Component: Home,
-},
-{
-path: 'chat/:chatId',
-Component: Chat,
-},
+{ index: true, Component: Home },
+{ path: 'chat/:chatId', Component: Chat },
 {
 path: 'profile',
-element: (
-<ProtectedRoute>
-<Profile />
-</ProtectedRoute>
-),
+element: (<ProtectedRoute><Profile /></ProtectedRoute>),
 },
 {
 path: 'settings',
-element: (
-<ProtectedRoute>
-<Settings />
-</ProtectedRoute>
-),
+element: (<ProtectedRoute><Settings /></ProtectedRoute>),
 },
 {
 path: 'apps',
-element: (
-<ProtectedRoute>
-<AppsPage />
-</ProtectedRoute>
-),
+element: (<ProtectedRoute><AppsPage /></ProtectedRoute>),
 },
-{
-path: 'app/:id',
-Component: AppView,
-},
-{
-path: 'discover',
-Component: DiscoverPage,
-},
-{
-path: 'pricing',
-Component: PricingPage,
-},
-{
-path: 'terms',
-Component: TermsPage,
-},
-{
-path: 'privacy',
-Component: PrivacyPage,
-},
+{ path: 'app/:id', Component: AppView },
+{ path: 'discover', Component: DiscoverPage },
+{ path: 'pricing', Component: PricingPage },
+{ path: 'terms', Component: TermsPage },
+{ path: 'privacy', Component: PrivacyPage },
+{ path: 'reset-password', Component: ResetPasswordPage },
 ],
 },
 ] satisfies RouteObject[];

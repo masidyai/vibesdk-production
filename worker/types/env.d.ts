@@ -26,6 +26,7 @@ declare namespace Cloudflare {
 		OPENROUTER_API_KEY: string;
 		PLATFORM_MODEL_PROVIDERS: string;
 		SANDBOX_SERVICE_API_KEY: string;
+		RESEND_API_KEY?: string;
 		STRIPE_SECRET_KEY?: string;
 		STRIPE_WEBHOOK_SECRET?: string;
 		STRIPE_PRO_PRICE_ID?: string;

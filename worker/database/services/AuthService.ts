@@ -4,9 +4,10 @@
  */
 
 import * as schema from '../schema';
-import { eq, and, sql, or, lt, isNull } from 'drizzle-orm';
+import { eq, and, sql, or, lt, isNull, gt } from 'drizzle-orm';
 import { JWTUtils } from '../../utils/jwtUtils';
 import { generateSecureToken } from '../../utils/cryptoUtils';
+import { ResendService } from '../../services/email/ResendService';
 import { SessionService } from './SessionService';
 import { ApiKeyService } from './ApiKeyService';
 import { PasswordService } from '../../utils/passwordService';
@@ -1042,4 +1043,76 @@ export class AuthService extends BaseService {
         }
     }
     
+    /**
+     * Request a password reset — generates a token and sends the reset email.
+     * Always returns success to prevent user enumeration.
+     */
+    async forgotPassword(email: string, request: Request, baseUrl: string): Promise<void> {
+        const user = await this.database
+            .select({ id: schema.users.id, email: schema.users.email, provider: schema.users.provider, passwordHash: schema.users.passwordHash })
+            .from(schema.users)
+            .where(and(eq(schema.users.email, email.toLowerCase()), isNull(schema.users.deletedAt)))
+            .get();
+
+        // Always succeed silently — don't leak whether the email exists
+        if (!user || !user.passwordHash) return;
+
+        // Invalidate any existing tokens for this user
+        await this.database.delete(schema.passwordResetTokens).where(eq(schema.passwordResetTokens.userId, user.id));
+
+        const rawToken = generateSecureToken(32);
+        const jwtUtils = JWTUtils.getInstance(this.env);
+        const tokenHash = await jwtUtils.hashToken(rawToken);
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+        await this.database.insert(schema.passwordResetTokens).values({
+            id: generateId(),
+            userId: user.id,
+            tokenHash,
+            expiresAt,
+            used: false,
+        });
+
+        if (!ResendService.isConfigured(this.env)) {
+            logger.warn('RESEND_API_KEY not set — skipping password reset email', { userId: user.id });
+            return;
+        }
+
+        const resetUrl = baseUrl + '/reset-password?token=' + encodeURIComponent(rawToken);
+        await new ResendService(this.env).sendPasswordReset(user.email, resetUrl);
+        await this.logAuthAttempt(email, 'reset_password', true, request);
+    }
+
+    /**
+     * Consume a reset token and set a new password.
+     */
+    async resetPassword(rawToken: string, newPassword: string, request: Request): Promise<void> {
+        const jwtUtils = JWTUtils.getInstance(this.env);
+        const tokenHash = await jwtUtils.hashToken(rawToken);
+        const now = new Date();
+
+        const row = await this.database
+            .select()
+            .from(schema.passwordResetTokens)
+            .where(and(eq(schema.passwordResetTokens.tokenHash, tokenHash), eq(schema.passwordResetTokens.used, false), gt(schema.passwordResetTokens.expiresAt, now)))
+            .get();
+
+        if (!row) {
+            throw new SecurityError(SecurityErrorType.UNAUTHORIZED, 'Invalid or expired reset token', 400);
+        }
+
+        const passwordValidation = validatePassword(newPassword);
+        if (!passwordValidation.valid) {
+            throw new SecurityError(SecurityErrorType.INVALID_INPUT, passwordValidation.errors!.join(', '), 400);
+        }
+
+        const passwordHash = await this.passwordService.hash(newPassword);
+        await this.database.update(schema.users).set({ passwordHash, updatedAt: new Date() }).where(eq(schema.users.id, row.userId));
+        await this.database.update(schema.passwordResetTokens).set({ used: true }).where(eq(schema.passwordResetTokens.id, row.id));
+
+        // Revoke all sessions so attacker's stolen session is killed
+        await new SessionService(this.env).revokeAllUserSessions(row.userId);
+        await this.logAuthAttempt('', 'reset_password', true, request);
+    }
+
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Unified API Client - Premium quality abstraction for all worker API calls
  * Provides type-safe methods for all endpoints with proper error handling
  * Features 401 response interception to trigger authentication modals
@@ -1273,6 +1273,14 @@ class ApiClient {
 
 	async deleteAccount(): Promise<ApiResponse<{ message: string }>> {
 		return this.request<{ message: string }>('/api/auth/account', { method: 'DELETE' });
+	}
+
+	async forgotPassword(email: string): Promise<ApiResponse<{ message: string }>> {
+		return this.request<{ message: string }>('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) });
+	}
+
+	async resetPassword(token: string, password: string): Promise<ApiResponse<{ message: string }>> {
+		return this.request<{ message: string }>('/api/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, password }) });
 	}
 
 	async changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }): Promise<ApiResponse<{ message: string }>> {
