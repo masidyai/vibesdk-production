@@ -104,7 +104,7 @@ export default function Home() {
 	});
 
 	const placeholderPhrases = useMemo(
-		() => ['todo list app', 'F1 fantasy game', 'personal finance tracker'],
+		() => ['SaaS landing page', 'expense tracker with charts', 'AI recipe generator', 'portfolio website', 'inventory dashboard', 'booking app'],
 		[],
 	);
 
@@ -203,23 +203,38 @@ export default function Home() {
 								: 'mt-[18vh] sm:mt-[22vh] md:mt-[26vh]',
 						)}
 					>
-						<div className="mb-6 sm:mb-7 grid gap-2">
-							<h1 className="w-full text-center text-[clamp(1.75rem,4.5vw,2.5rem)] font-semibold leading-[1.12] text-kumo-strong/80 z-20">
-								What should we{' '}
-								<span className="font-funky-mono font-bold text-[1.1em] tracking-tighter uppercase text-brand-emphasis">
-									build
-								</span>{' '}
-								today?
-							</h1>
-						<p className="text-center text-sm text-kumo-subtle mt-1">
-							Describe what you want — AI builds and deploys it in minutes.
-						</p>
-						</div>
+						<div className="mb-8 sm:mb-9 grid gap-4">
+{/* Trust badges */}
+<div className="flex flex-wrap items-center justify-center gap-2">
+<span className="inline-flex items-center gap-1.5 rounded-full border border-kumo-line/60 bg-kumo-base/60 backdrop-blur-sm px-3 py-1 text-xs text-kumo-subtle">
+<span className="size-1.5 rounded-full bg-brand animate-pulse inline-block" />
+Free to start
+</span>
+<span className="inline-flex items-center gap-1.5 rounded-full border border-kumo-line/60 bg-kumo-base/60 backdrop-blur-sm px-3 py-1 text-xs text-kumo-subtle">
+⚡ Deploy in seconds
+</span>
+<span className="inline-flex items-center gap-1.5 rounded-full border border-kumo-line/60 bg-kumo-base/60 backdrop-blur-sm px-3 py-1 text-xs text-kumo-subtle">
+🔒 No credit card needed
+</span>
+</div>
+<h1 className="w-full text-center text-[clamp(2.2rem,6vw,3.5rem)] font-bold leading-[1.06] tracking-tight text-kumo-strong z-20">
+Turn ideas into{' '}
+<span className="font-funky-mono font-black text-[1.05em] tracking-tighter uppercase text-brand-emphasis">
+live apps
+</span>
+<br className="hidden sm:block" />
+{' '}in minutes
+</h1>
+<p className="text-center text-sm sm:text-base text-kumo-subtle max-w-lg mx-auto leading-relaxed">
+Describe what you want. Masidy writes the code, deploys it live,
+and gives you a shareable URL — no setup required.
+</p>
+</div>
 						<PromptBox
 							value={query}
 							onChange={setQuery}
 							onSubmit={() => handleCreateApp(query, projectMode)}
-							placeholder="Create a "
+							placeholder="Build me a "
 							animatedPlaceholder
 							placeholderPhrases={placeholderPhrases}
 							images={images}
@@ -307,8 +322,8 @@ export default function Home() {
 							<div className="flex flex-col gap-6">
 								<div className="flex items-end justify-between gap-4">
 									<div className="grid gap-1.5 min-w-0">
-										<h2 className="text-xl sm:text-2xl font-semibold text-kumo-default/90">
-											Discover apps from the community
+										<h2 className="text-xl sm:text-2xl font-bold font-funky-mono text-kumo-strong">
+											Built with Masidy
 										</h2>
 									</div>
 									<div ref={discoverLinkRef}>
