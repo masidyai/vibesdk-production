@@ -677,6 +677,9 @@ export default function AppView() {
 	return (
 		<div className="size-full flex flex-col min-h-0">
 			<title>{app.title ? `${app.title} - Masidy` : 'App - Masidy'}</title>
+			{app.screenshotUrl && <meta property="og:image" content={app.screenshotUrl} />}
+			<meta property="og:title" content={app.title || "Masidy App"} />
+			<meta name="twitter:card" content={app.screenshotUrl ? "summary_large_image" : "summary"} />
 			{app.publishedUrl && (
 				<div className="shrink-0 flex items-center justify-between gap-3 px-4 py-2 bg-green-50 dark:bg-green-950/30 border-b border-green-200 dark:border-green-800">
 					<div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300 min-w-0">
@@ -699,6 +702,12 @@ export default function AppView() {
 					>
 						Open ↗
 					</a>
+				</div>
+			)}
+			{app.visibility === 'public' && !isOwner && (
+				<div className="shrink-0 flex items-center justify-between gap-3 px-4 py-2 bg-kumo-elevated border-b border-kumo-line">
+					<span className="text-xs text-kumo-subtle">Built with <span className="font-semibold text-kumo-default">Masidy</span></span>
+					<a href="https://masidy.dev" target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-kumo-brand hover:opacity-80 transition-opacity">Build yours free →</a>
 				</div>
 			)}
 			<div className="shrink-0 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-3 sm:px-4 py-2 border-b bg-kumo-base overflow-x-auto">

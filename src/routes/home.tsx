@@ -211,6 +211,9 @@ export default function Home() {
 								</span>{' '}
 								today?
 							</h1>
+						<p className="text-center text-sm text-kumo-subtle mt-1">
+							Describe what you want — AI builds and deploys it in minutes.
+						</p>
 						</div>
 						<PromptBox
 							value={query}

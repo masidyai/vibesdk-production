@@ -12,6 +12,7 @@ import PricingPage from './routes/pricing';
 import TermsPage from './routes/terms';
 import PrivacyPage from './routes/privacy';
 import ResetPasswordPage from './routes/reset-password';
+import NotFoundPage from './routes/not-found';
 import { ProtectedRoute } from './routes/protected-route';
 
 const routes = [
@@ -39,6 +40,7 @@ element: (<ProtectedRoute><AppsPage /></ProtectedRoute>),
 { path: 'terms', Component: TermsPage },
 { path: 'privacy', Component: PrivacyPage },
 { path: 'reset-password', Component: ResetPasswordPage },
+			{ path: '*', Component: NotFoundPage },
 ],
 },
 ] satisfies RouteObject[];

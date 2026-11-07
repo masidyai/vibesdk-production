@@ -66,6 +66,11 @@ export function createApp(env: Env): Hono<AppEnv> {
         if (upgradeHeader?.toLowerCase() === 'websocket') {
             return next();
         }
+
+        // Skip CSRF for Stripe webhook — Stripe signs requests with its own secret
+        if (c.req.url.includes('/api/webhooks/')) {
+            return next();
+        }
         
         try {
             // Handle GET requests - establish CSRF token if needed

@@ -185,6 +185,11 @@ export class AuthService extends BaseService {
                 userId,
                 request
             );
+
+            // Send welcome email (best-effort, never blocks registration)
+            if (ResendService.isConfigured(this.env)) {
+                new ResendService(this.env).sendWelcome(data.email, newUser.displayName || data.email.split('@')[0]).catch(() => null);
+            }
             
             return {
                 user: mapUserResponse(newUser),

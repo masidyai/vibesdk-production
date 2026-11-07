@@ -102,4 +102,31 @@ export class ResendService {
             text: `Reset your Masidy password\n\nClick the link below to set a new password. This link expires in 1 hour:\n\n${resetUrl}\n\nIf you didn't request this, ignore this email.\n\n© 2026 Masidy`,
         });
     }
+
+    /** Welcome email sent on new registration */
+    async sendWelcome(to: string, name: string): Promise<void> {
+        const firstName = name.split(' ')[0] || name;
+        return this.send({
+            to,
+            subject: 'Welcome to Masidy!',
+            html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:sans-serif;background:#0a0a0a;color:#e5e5e5;margin:0;padding:40px 20px">
+  <div style="max-width:480px;margin:0 auto;background:#141414;border-radius:12px;border:1px solid #222">
+    <div style="padding:32px;border-bottom:1px solid #222;text-align:center">
+      <img src="https://masidy.dev/masidy-glyph-dark.png" width="40" height="40" alt="Masidy" style="margin-bottom:16px"/>
+      <h1 style="margin:0;font-size:20px;font-weight:700;color:#fff">Welcome to Masidy, ${firstName}!</h1>
+    </div>
+    <div style="padding:32px">
+      <p style="margin:0 0 16px;color:#999;line-height:1.6">You are all set. Describe what you want to build and the AI takes it from there.</p>
+      <a href="https://masidy.dev" style="display:block;text-align:center;background:#7FFF00;color:#000;font-weight:700;font-size:15px;padding:14px 24px;border-radius:8px;text-decoration:none;margin:24px 0">Start building</a>
+      <p style="margin:0;color:#555;font-size:13px">Questions? <a href="mailto:support@masidy.dev" style="color:#666">support@masidy.dev</a></p>
+    </div>
+    <div style="padding:20px 32px;border-top:1px solid #222;text-align:center">
+      <p style="margin:0;color:#444;font-size:12px">&copy; 2026 Masidy</p>
+    </div>
+  </div>
+</body></html>`,
+            text: `Welcome to Masidy, ${firstName}!\n\nYou are all set. Start building at https://masidy.dev\n\nQuestions? support@masidy.dev`,
+        });
+    }
 }
