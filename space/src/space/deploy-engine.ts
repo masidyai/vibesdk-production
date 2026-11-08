@@ -55,6 +55,8 @@ export async function handleDeployCommand(
 
 // ─── Read files from a git branch using shell's git ─────────────────────────
 
+const FILE_READ_CONCURRENCY = 8
+
 async function readBranchFiles(
   ctx: DeployContext,
   branch: string
@@ -73,21 +75,29 @@ async function readBranchFiles(
   const allFiles = await globInfos(ctx.fs, "**/*")
   const files: Record<string, string> = {}
 
-  for (const fileInfo of allFiles) {
-    if (fileInfo.type !== "file") continue
-    // Skip git's object store and the ArtifactsFileSystem bookkeeping dir —
-    // neither is part of the app and must never ship in a deploy bundle.
-    if (fileInfo.path.startsWith("/.git/") || fileInfo.path === "/.git") continue
-    if (fileInfo.path.startsWith("/.afs/") || fileInfo.path === "/.afs") continue
+  for (let offset = 0; offset < allFiles.length; offset += FILE_READ_CONCURRENCY) {
+    const batch = allFiles.slice(offset, offset + FILE_READ_CONCURRENCY)
+    const entries = await Promise.all(
+      batch.map(async (fileInfo): Promise<[string, string] | null> => {
+        if (fileInfo.type !== "file") return null
+        // Skip git's object store and the ArtifactsFileSystem bookkeeping dir —
+        // neither is part of the app and must never ship in a deploy bundle.
+        if (fileInfo.path.startsWith("/.git/") || fileInfo.path === "/.git") return null
+        if (fileInfo.path.startsWith("/.afs/") || fileInfo.path === "/.afs") return null
 
-    let content: string
-    try {
-      content = await ctx.fs.readFile(fileInfo.path)
-    } catch {
-      continue
+        try {
+          const content = await ctx.fs.readFile(fileInfo.path)
+          const path = fileInfo.path.startsWith("/") ? fileInfo.path.slice(1) : fileInfo.path
+          return [path, content]
+        } catch {
+          return null
+        }
+      })
+    )
+
+    for (const entry of entries) {
+      if (entry) files[entry[0]] = entry[1]
     }
-    const path = fileInfo.path.startsWith("/") ? fileInfo.path.slice(1) : fileInfo.path
-    files[path] = content
   }
 
   return { commitHash, files }
@@ -154,7 +164,12 @@ export async function buildBranchDeployment(
   ctx: DeployContext,
   branch: string
 ): Promise<BranchDeploymentBundle> {
+  const fileReadStartedAt = Date.now()
   const { commitHash, files } = await readBranchFiles(ctx, branch)
+  console.info("SpaceDO deployment files loaded", {
+    fileCount: Object.keys(files).length,
+    durationMs: Date.now() - fileReadStartedAt,
+  })
   if (Object.keys(files).length === 0) {
     throw new Error(`No files found in branch "${branch}"`)
   }
@@ -176,6 +191,7 @@ export async function buildBranchDeployment(
   }
 
   try {
+    const bundleStartedAt = Date.now()
     const assetsDir = wranglerCfg.assets?.directory?.replace(/^\.?\//, "").replace(/\/$/, "")
     const collectedAssets = assetsDir
       ? Object.fromEntries(
@@ -202,6 +218,11 @@ export async function buildBranchDeployment(
         assetConfig,
         server: wranglerCfg.main,
       })
+      console.info("SpaceDO deployment bundle created", {
+        moduleCount: Object.keys(result.modules).length,
+        assetCount: Object.keys(result.assets).length,
+        durationMs: Date.now() - bundleStartedAt,
+      })
       return {
         branch,
         commitHash,
@@ -216,6 +237,11 @@ export async function buildBranchDeployment(
     const result = await createWorker({ files, entryPoint: wranglerCfg.main })
     const modules = serializeModules(result.modules)
     modules["__STATIC_CONTENT_MANIFEST"] ??= { text: "{}" }
+    console.info("SpaceDO deployment bundle created", {
+      moduleCount: Object.keys(result.modules).length,
+      assetCount: 0,
+      durationMs: Date.now() - bundleStartedAt,
+    })
     return {
       branch,
       commitHash,

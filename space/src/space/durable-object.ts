@@ -525,11 +525,18 @@ export class SpaceDO extends DurableObject<Env> {
   // ── Deploy RPC methods ──────────────────────────────────────────
 
   async deploy(branch: string): Promise<unknown> {
+    const deployStartedAt = Date.now()
     await this.ensureInit()
-    // The deploy engine reads the full branch tree, so ensure the Artifacts
-    // base is materialized into the overlay first.
+    // Materialize once, then commit before building so even failed builds
+    // retain the user's latest files in durable history.
+    const materializeStartedAt = Date.now()
     await this.materializeAll()
-    await this.flushCheckpoint()
+    console.info("SpaceDO deploy workspace materialized", {
+      durationMs: Date.now() - materializeStartedAt,
+    })
+    await this.gitCommitLocal("deploy: snapshot working tree")
+    const pushStartedAt = Date.now()
+    const pushPromise = this.backend.push(branch)
     const fakeRequest = new Request("http://internal/?cmd=deploy", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -545,8 +552,14 @@ export class SpaceDO extends DurableObject<Env> {
     const spaceName = this.ctx.id.name ?? "space"
     data.preview_url = `/space/${spaceName}/preview/${encodeURIComponent(branch)}/`
 
+    await pushPromise
+    console.info("SpaceDO deployment synced to Artifacts", {
+      durationMs: Date.now() - pushStartedAt,
+      totalDurationMs: Date.now() - deployStartedAt,
+      succeeded: !data.error,
+    })
+
     if (!data.error) {
-      await this.backend.push(branch)
       setTimeout(() => {
         const ctx = this.ctx as unknown as { abort: (reason?: string) => void }
         ctx.abort("Generated app deployment updated")

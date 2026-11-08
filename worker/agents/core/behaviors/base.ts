@@ -321,7 +321,7 @@ export abstract class BaseCodingBehavior<TState extends BaseProjectState>
     /**
      * Cancels the current inference operation if any
      */
-    public cancelCurrentInference(): boolean {
+    public async cancelCurrentInference(): Promise<boolean> {
         if (this.currentAbortController) {
             this.logger.info('Cancelling current inference operation');
             this.currentAbortController.abort();

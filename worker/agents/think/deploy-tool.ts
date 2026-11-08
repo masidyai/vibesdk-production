@@ -33,13 +33,6 @@ branch: z
 execute: async (args: { branch?: string }) => {
 const branch = args.branch && args.branch.length > 0 ? args.branch : 'main';
 try {
-await withDurableObjectResetRetry(getStub, (stub) =>
-stub.gitCommit('deploy: snapshot working tree'),
-);
-} catch {
-// No changes to commit (clean tree) — proceed to deploy the existing HEAD.
-}
-try {
 const result = await withDurableObjectResetRetry(getStub, (stub) => stub.deploy(branch));
 return JSON.stringify({ branch, ...(result as Record<string, unknown>) }, null, 2);
 } catch (e) {

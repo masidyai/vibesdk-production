@@ -141,7 +141,7 @@ export async function handleWebSocketMessage(
                 logger.info('User requested to stop generation');
                 
                 // Cancel current inference operation
-                const wasCancelled = agent.getBehavior().cancelCurrentInference();
+                const wasCancelled = await agent.getBehavior().cancelCurrentInference();
                 
                 // Clear shouldBeGenerating flag
                 agent.setState({ 

@@ -24,7 +24,12 @@ import {
 import { useFeature } from '@/features';
 import { useAuthGuard } from '../hooks/useAuthGuard';
 import { usePaginatedApps } from '@/hooks/use-paginated-apps';
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
+import {
+	AnimatePresence,
+	LayoutGroup,
+	motion,
+	useReducedMotion,
+} from 'framer-motion';
 import { AppCard } from '@/components/shared/AppCard';
 import { LinkButton } from '@cloudflare/kumo';
 import { useImageUpload } from '@/hooks/use-image-upload';
@@ -50,6 +55,7 @@ export default function Home() {
 	const [showLimitDialog, setShowLimitDialog] =
 		useState<React.ReactElement | null>(null);
 	const promptRef = useRef<HTMLDivElement>(null);
+	const prefersReducedMotion = useReducedMotion();
 
 	const handleConnectCloudflare = useCallback(() => {
 		void startCloudflareConnect(window.location.href);
@@ -118,7 +124,7 @@ export default function Home() {
 		[],
 	);
 
-	const { apps, loading, error: appsError } = usePaginatedApps({
+	const { apps } = usePaginatedApps({
 		type: 'public',
 		defaultSort: 'trending',
 		defaultPeriod: 'week',
@@ -128,23 +134,17 @@ export default function Home() {
 	const discoverApps = useMemo(() => (apps ?? []).slice(0, 9), [apps]);
 	const starterIdeas = [
 		{
-			title: 'A storefront for handmade goods',
 			category: 'E-commerce',
-			tone: 'apricot',
 			prompt:
 				'Build a warm, modern storefront for a handmade ceramics brand with a product grid and an about page.',
 		},
 		{
-			title: 'A dashboard for your next big idea',
 			category: 'Dashboard',
-			tone: 'blue',
 			prompt:
 				'Create a polished project dashboard with a sidebar, task overview, and progress charts.',
 		},
 		{
-			title: 'A home for your creative work',
 			category: 'Portfolio',
-			tone: 'violet',
 			prompt:
 				'Design a bold portfolio website for a creative studio with a project gallery and contact section.',
 		},
@@ -209,7 +209,13 @@ export default function Home() {
 		clearImages();
 	};
 
-	const discoverLinkRef = useRef<HTMLDivElement>(null);
+	const focusPrompt = () => {
+		promptRef.current?.scrollIntoView({
+			behavior: prefersReducedMotion ? 'auto' : 'smooth',
+			block: 'center',
+		});
+		promptRef.current?.querySelector('textarea')?.focus({ preventScroll: true });
+	};
 
 	return (
 		<div className="home-page relative flex flex-col items-center w-full min-h-full">
@@ -225,9 +231,9 @@ export default function Home() {
 							<span>Your idea, made real</span>
 						</div>
 						<h1>
-							From first idea
+							Your idea.
 							<br />
-							to <span>something real.</span>
+							<span>Made real.</span>
 						</h1>
 						<p className="home-hero__description">
 							Describe what you want to make. Masidy builds your app
@@ -294,50 +300,6 @@ export default function Home() {
 						</div>
 					</div>
 
-					<div
-						className="home-hero__visual"
-						role="img"
-						aria-label="Illustrative storefront preview for a handmade home goods shop"
-					>
-						<div className="home-preview">
-							<div className="home-preview__bar">
-								<div className="home-preview__dots" aria-hidden="true">
-									<i /><i /><i />
-								</div>
-								<span>your-next-idea.masidy.app</span>
-								<div className="home-preview__live"><i /> PREVIEW</div>
-							</div>
-							<div className="home-preview__site">
-								<div className="home-preview__nav">
-									<b>FORME<span>.</span></b>
-									<div><i /><i /><i /></div>
-									<strong>SHOP THE EDIT <ArrowRight aria-hidden="true" /></strong>
-								</div>
-								<div className="home-preview__main">
-									<div className="home-preview__headline">
-										<span>OBJECTS FOR SLOW LIVING</span>
-										<strong>Make room<br />for <em>beautiful.</em></strong>
-										<p>Considered pieces for the everyday rituals that make a home.</p>
-										<button type="button" tabIndex={-1}>EXPLORE THE COLLECTION <ArrowUpRight aria-hidden="true" /></button>
-									</div>
-									<div className="home-preview__objects" aria-hidden="true">
-										<div className="home-object home-object--vase"><i /></div>
-										<div className="home-object home-object--bowl"><i /></div>
-										<div className="home-preview__caption">01 / THE SUNDAY COLLECTION</div>
-									</div>
-								</div>
-								<div className="home-preview__bottom">
-									<span>DESIGNED TO FEEL LIKE HOME</span>
-									<span>SCROLL TO DISCOVER ↓</span>
-								</div>
-							</div>
-						</div>
-						<div className="home-preview-note">
-							<div className="home-preview-note__icon"><Sparkles aria-hidden="true" /></div>
-							<div><strong>A little idea goes a long way</strong><span>A sample of what you can create with Masidy</span></div>
-						</div>
-						<div className="home-hero__glow" aria-hidden="true" />
-					</div>
 				</section>
 
 				<AnimatePresence mode="popLayout">
@@ -370,7 +332,13 @@ export default function Home() {
 					)}
 				</AnimatePresence>
 
-				<section className="home-how relative z-10">
+				<motion.section
+					className="home-how relative z-10"
+					initial={prefersReducedMotion ? false : { opacity: 0, y: 30 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					viewport={{ once: true, amount: 0.15 }}
+					transition={{ duration: 0.75, ease: [0.2, 0.75, 0.2, 1] }}
+				>
 					<div className="home-section-heading">
 						<span>FROM IDEA TO LIVE</span>
 						<h2>Less setup. More <em>making.</em></h2>
@@ -396,33 +364,29 @@ export default function Home() {
 							<p>Deploy your finished project and share it with the world.</p>
 						</article>
 					</div>
-				</section>
+				</motion.section>
 
-				<section className="home-showcase relative z-10">
-					<div className="home-showcase__heading">
-						<div className="home-section-heading">
-							<span>{discoverApps.length ? 'MADE WITH MASIDY' : 'START WITH A CONCEPT'}</span>
-							<h2>
-								{discoverApps.length ? (
-									<>Good ideas look <em>good.</em></>
-								) : (
-									<>A little inspiration goes a <em>long way.</em></>
-								)}
-							</h2>
-							<p>
-								{discoverApps.length
-									? 'Explore what people are creating—or use these ideas to start your own.'
-									: 'Choose a direction, then make it yours with Masidy.'}
-							</p>
+				{discoverApps.length > 0 && (
+					<motion.section
+						className="home-showcase relative z-10"
+						initial={prefersReducedMotion ? false : { opacity: 0, y: 30 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, amount: 0.12 }}
+						transition={{ duration: 0.75, ease: [0.2, 0.75, 0.2, 1] }}
+					>
+						<div className="home-showcase__heading">
+							<div className="home-section-heading">
+								<span>MADE WITH MASIDY</span>
+								<h2>Good ideas look <em>good.</em></h2>
+								<p>Explore what people are creating—or use these ideas to start your own.</p>
+							</div>
+							<div>
+								<LinkButton variant="outline" size="sm" href="/discover">
+									Explore projects
+									<ArrowUpRight className="size-3.5 opacity-70" />
+								</LinkButton>
+							</div>
 						</div>
-						<div ref={discoverLinkRef}>
-							<LinkButton variant="outline" size="sm" href="/discover">
-								Explore projects
-								<ArrowUpRight className="size-3.5 opacity-70" />
-							</LinkButton>
-						</div>
-					</div>
-					{discoverApps.length > 0 ? (
 						<motion.div
 							layout
 							transition={{ duration: 0.4 }}
@@ -441,46 +405,16 @@ export default function Home() {
 								))}
 							</AnimatePresence>
 						</motion.div>
-					) : (
-						<>
-							<p className="home-showcase__notice">
-								{appsError
-									? 'Community projects are temporarily unavailable. Here are a few ideas to get you started.'
-									: loading
-										? 'Loading community projects… Here are a few ideas while you wait.'
-										: 'These are starting points, not templates—Masidy will shape them around your idea.'}
-							</p>
-							<div className="home-idea-cards">
-								{starterIdeas.map((idea, index) => (
-									<button
-										key={idea.category}
-										type="button"
-										className="home-idea-card"
-										onClick={() => {
-											setQuery(idea.prompt);
-											window.scrollTo({ top: 0, behavior: 'smooth' });
-										}}
-									>
-										<div className={`home-idea-card__art home-idea-card__art--${idea.tone}`}>
-											<div className="home-idea-card__window">
-												<span>{idea.category.toUpperCase()}</span>
-												<strong>{index === 0 ? 'made for' : index === 1 ? 'move with' : 'made to'}<br /><em>{index === 0 ? 'everyday.' : index === 1 ? 'intention.' : 'stand out.'}</em></strong>
-												<i /><i /><i />
-											</div>
-										</div>
-										<span className="home-idea-card__meta">{idea.category}<ArrowUpRight aria-hidden="true" /></span>
-										<strong>{idea.title}</strong>
-									</button>
-								))}
-							</div>
-						</>
-					)}
-					{!discoverApps.length && loading && (
-						<div className="home-showcase__loading">Finding projects to inspire you…</div>
-					)}
-				</section>
+					</motion.section>
+				)}
 
-				<section className="home-cta relative z-10">
+				<motion.section
+					className="home-cta relative z-10"
+					initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					viewport={{ once: true, amount: 0.2 }}
+					transition={{ duration: 0.7, ease: [0.2, 0.75, 0.2, 1] }}
+				>
 					<div>
 						<span><Rocket aria-hidden="true" /> YOUR NEXT PROJECT STARTS HERE</span>
 						<h2>Make something<br /><em>you’re proud of.</em></h2>
@@ -488,16 +422,11 @@ export default function Home() {
 					</div>
 					<button
 						type="button"
-						onClick={() =>
-							promptRef.current?.scrollIntoView({
-								behavior: 'smooth',
-								block: 'center',
-							})
-						}
+						onClick={focusPrompt}
 					>
 						Start creating <ArrowRight aria-hidden="true" />
 					</button>
-				</section>
+				</motion.section>
 			</LayoutGroup>
 
 			{/* Usage limit dialogs */}

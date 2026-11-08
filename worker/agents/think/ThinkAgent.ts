@@ -118,6 +118,7 @@ function patchToolCallChunk(
 function fixToolCallStream(
 	body: ReadableStream<Uint8Array>,
 	onSignature: (id: string, signature: string) => void,
+	onFinish: () => void,
 ): ReadableStream<Uint8Array> {
 	const decoder = new TextDecoder();
 	const encoder = new TextEncoder();
@@ -146,6 +147,7 @@ function fixToolCallStream(
 			},
 			flush(controller) {
 				if (buffer) controller.enqueue(encoder.encode(transformLine(buffer)));
+				onFinish();
 			},
 		}),
 	);
@@ -233,18 +235,32 @@ export class ThinkAgent extends Think<Env> {
 		// response and re-inject them into outgoing request history (the AI SDK
 		// drops them, which Gemini 3 rejects with `400 INVALID_ARGUMENT`).
 		const gatewayFetch: typeof fetch = async (input, init) => {
+			const requestStartedAt = Date.now();
 			const headers = new Headers(init?.headers);
 			if (model.useStoredKeys) headers.delete('authorization');
 			let body = init?.body;
 			if (typeof body === 'string') body = this.injectThoughtSignatures(body);
 			const res = await fetch(input as RequestInfo, { ...(init ?? {}), headers, body });
-			if (!res.body) return res;
+			const responseHeadersAt = Date.now();
+			if (!res.body) {
+				console.info('Think model request completed without a stream', {
+					responseHeadersMs: responseHeadersAt - requestStartedAt,
+				});
+				return res;
+			}
 			const outHeaders = new Headers(res.headers);
 			// Body length/encoding change after transforming the stream.
 			outHeaders.delete('content-length');
 			outHeaders.delete('content-encoding');
 			return new Response(
-				fixToolCallStream(res.body, (id, sig) => this.thoughtSignatures.set(id, sig)),
+				fixToolCallStream(
+					res.body,
+					(id, sig) => this.thoughtSignatures.set(id, sig),
+					() => console.info('Think model request completed', {
+						responseHeadersMs: responseHeadersAt - requestStartedAt,
+						totalMs: Date.now() - requestStartedAt,
+					}),
+				),
 				{ status: res.status, statusText: res.statusText, headers: outHeaders },
 			);
 		};
@@ -295,10 +311,13 @@ export class ThinkAgent extends Think<Env> {
 		this.turnUsage = null;
 		if (config) {
 			try {
-				const userConfig = await getUserConfigurableSettings(this.env, config.userId);
+				const [userConfig, hasCloudflare] = await Promise.all([
+					getUserConfigurableSettings(this.env, config.userId),
+					hasCloudflareConfigured(this.env, config.userId),
+				]);
 				this.turnUsage = {
 					config: userConfig.security.rateLimit,
-					hasCloudflareConfigured: await hasCloudflareConfigured(this.env, config.userId),
+					hasCloudflareConfigured: hasCloudflare,
 				};
 			} catch (error) {
 				console.warn('Failed to resolve Think credit metering configuration', error);

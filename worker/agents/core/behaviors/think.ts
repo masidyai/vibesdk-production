@@ -41,6 +41,8 @@ import type { CloudflareDeploymentErrorCode } from '../../../api/websocketTypes'
 type ThinkAgentStub = {
 	configureVibe: (config: ThinkAgentConfig) => Promise<void>;
 	chat: (userMessage: string, callback: RpcTarget) => Promise<void>;
+	cancelChat: (requestId: string, reason?: string) => Promise<void>;
+	cancelAllChats: () => Promise<void>;
 	getMessages: () => Promise<UIMessage[]>;
 	clearMessages: () => Promise<void>;
 };
@@ -83,10 +85,13 @@ class ThinkStreamForwarder extends RpcTarget {
 	constructor(
 		private readonly onChunkJson: (json: string) => void | Promise<void>,
 		private readonly onErrorCb: (message: string) => void,
+		private readonly onStartCb: (requestId: string) => void,
 	) {
 		super();
 	}
-	onStart(_event: { requestId: string }): void {}
+	onStart(event: { requestId: string }): void {
+		this.onStartCb(event.requestId);
+	}
 	async onEvent(json: string): Promise<void> {
 		await this.onChunkJson(json);
 	}
@@ -112,8 +117,43 @@ export class ThinkCodingBehavior
 	extends BaseCodingBehavior<ThinkState>
 	implements ICodingAgent {
 	protected static readonly PROJECT_NAME_PREFIX_MAX_LENGTH = 20;
+	private activeThinkRequestId?: string;
+	private generationStopRequested = false;
 
 	override getBehavior(): 'think' { return 'think'; }
+
+	override async generateAllFiles(): Promise<void> {
+		if (!this.isCodeGenerating()) {
+			this.generationStopRequested = false;
+		}
+		await super.generateAllFiles();
+	}
+
+	override async cancelCurrentInference(): Promise<boolean> {
+		const wasGenerating = this.isCodeGenerating();
+		const requestId = this.activeThinkRequestId;
+		if (wasGenerating || requestId) {
+			this.generationStopRequested = true;
+		}
+
+		if (requestId) {
+			await this.cancelThinkRequest(requestId);
+			return true;
+		}
+
+		if (wasGenerating) {
+			const stub = await this.getThinkStub();
+			await stub.cancelAllChats();
+			return true;
+		}
+
+		return super.cancelCurrentInference();
+	}
+
+	private async cancelThinkRequest(requestId: string): Promise<void> {
+		const stub = await this.getThinkStub();
+		await stub.cancelChat(requestId, 'Generation stopped by user');
+	}
 
 	// ──────────────────────────────────────────────────────────────
 	// DO stubs
@@ -467,7 +507,7 @@ export class ThinkCodingBehavior
 			this.setState({ ...this.state, pendingUserInputs: [this.state.query] });
 		}
 
-		while (this.state.pendingUserInputs.length > 0) {
+		while (this.state.pendingUserInputs.length > 0 && !this.generationStopRequested) {
 			const pending = this.state.pendingUserInputs.slice();
 			this.setState({ ...this.state, pendingUserInputs: [] });
 
@@ -475,12 +515,15 @@ export class ThinkCodingBehavior
 			try {
 				await this.runPrompt(compiled);
 			} catch (e) {
+				if (this.generationStopRequested) break;
 				this.logger.error('Think prompt failed', e);
 				this.broadcast(WebSocketMessageResponses.ERROR, {
 					error: e instanceof Error ? e.message : String(e),
 				});
 				break;
 			}
+
+			if (this.generationStopRequested) break;
 
 			if (!this.isMVPGenerated()) {
 				this.setMVPGenerated();
@@ -497,6 +540,7 @@ export class ThinkCodingBehavior
 	 * `UIMessageChunk`s into VibeSDK WebSocket events.
 	 */
 	private async runPrompt(text: string): Promise<void> {
+		const turnStartedAt = Date.now();
 		const conversationId = IdGenerator.generateConversationId();
 		this.broadcast(WebSocketMessageResponses.CONVERSATION_RESPONSE, {
 			message: '',
@@ -508,6 +552,7 @@ export class ThinkCodingBehavior
 		const seenWrittenFiles = new Set<string>();
 		const toolNames = new Map<string, string>();
 		const toolInputs = new Map<string, Record<string, unknown>>();
+		const toolStartedAt = new Map<string, number>();
 
 		const forwarder = new ThinkStreamForwarder(
 			(json) => {
@@ -517,15 +562,40 @@ export class ThinkCodingBehavior
 				} catch {
 					return;
 				}
-				return this.translateChunk(chunk, conversationId, accumulated, seenWrittenFiles, toolNames, toolInputs);
+				return this.translateChunk(
+					chunk,
+					conversationId,
+					accumulated,
+					seenWrittenFiles,
+					toolNames,
+					toolInputs,
+					toolStartedAt,
+				);
 			},
 			(err) => this.broadcast(WebSocketMessageResponses.ERROR, { error: err }),
+			(requestId) => {
+				this.activeThinkRequestId = requestId;
+				if (this.generationStopRequested) {
+					void this.cancelThinkRequest(requestId).catch((error: unknown) => {
+						this.logger.error('Failed to cancel Think generation', error);
+					});
+				}
+			},
 		);
 
 		const stub = await this.getThinkStub();
+		this.logger.info('Think agent ready', {
+			setupDurationMs: Date.now() - turnStartedAt,
+		});
 		try {
 			await stub.chat(text, forwarder);
 		} finally {
+			this.logger.info('Think turn completed', {
+				durationMs: Date.now() - turnStartedAt,
+			});
+			if (this.activeThinkRequestId) {
+				this.activeThinkRequestId = undefined;
+			}
 			this.broadcast(WebSocketMessageResponses.USAGE_UPDATED, {
 				message: 'Usage data updated',
 			});
@@ -553,6 +623,7 @@ export class ThinkCodingBehavior
 		seenWrittenFiles: Set<string>,
 		toolNames: Map<string, string>,
 		toolInputs: Map<string, Record<string, unknown>>,
+		toolStartedAt: Map<string, number>,
 	): Promise<void> {
 		switch (chunk.type) {
 			case 'text-delta': {
@@ -592,6 +663,7 @@ export class ThinkCodingBehavior
 			case 'tool-input-start': {
 				const { toolCallId, toolName } = chunk as { toolCallId: string; toolName: string };
 				toolNames.set(toolCallId, toolName);
+				toolStartedAt.set(toolCallId, Date.now());
 				this.broadcast(WebSocketMessageResponses.CONVERSATION_RESPONSE, {
 					message: '',
 					conversationId,
@@ -605,6 +677,7 @@ export class ThinkCodingBehavior
 					toolCallId: string; toolName: string; input: unknown;
 				};
 				toolNames.set(toolCallId, toolName);
+				toolStartedAt.set(toolCallId, Date.now());
 				const args = (input && typeof input === 'object') ? (input as Record<string, unknown>) : {};
 				toolInputs.set(toolCallId, args);
 				if (isFileWriteTool(toolName)) {
@@ -623,6 +696,11 @@ export class ThinkCodingBehavior
 			case 'tool-output-available': {
 				const { toolCallId, output } = chunk as { toolCallId: string; output: unknown };
 				const toolName = toolNames.get(toolCallId) || 'tool';
+				this.logger.info('Think tool completed', {
+					toolName,
+					durationMs: Date.now() - (toolStartedAt.get(toolCallId) ?? Date.now()),
+				});
+				toolStartedAt.delete(toolCallId);
 				const args = toolInputs.get(toolCallId) || {};
 				this.broadcast(WebSocketMessageResponses.CONVERSATION_RESPONSE, {
 					message: '',
@@ -644,6 +722,11 @@ export class ThinkCodingBehavior
 			case 'tool-output-error': {
 				const { toolCallId, errorText } = chunk as { toolCallId: string; errorText: string };
 				const toolName = toolNames.get(toolCallId) || 'tool';
+				this.logger.warn('Think tool failed', {
+					toolName,
+					durationMs: Date.now() - (toolStartedAt.get(toolCallId) ?? Date.now()),
+				});
+				toolStartedAt.delete(toolCallId);
 				const args = toolInputs.get(toolCallId) || {};
 				this.broadcast(WebSocketMessageResponses.CONVERSATION_RESPONSE, {
 					message: '',
