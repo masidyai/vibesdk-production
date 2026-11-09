@@ -231,8 +231,7 @@ export default function Home() {
 							<span>Your idea, made real</span>
 						</div>
 						<h1>
-							Your idea.
-							<br />
+							Your idea.{' '}
 							<span>Made real.</span>
 						</h1>
 						<p className="home-hero__description">
