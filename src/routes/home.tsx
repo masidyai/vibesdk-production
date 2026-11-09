@@ -260,7 +260,6 @@ export default function Home() {
 								limitsData={user ? limitsData : undefined}
 								onConnectCloudflare={handleConnectCloudflare}
 								variant="expanded"
-								className="home-prompt__input"
 								submitIcon={
 									user && usageLimitsLoading ? (
 										<Loader2 className="animate-spin" />
