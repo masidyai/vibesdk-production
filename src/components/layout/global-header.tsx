@@ -15,8 +15,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { OrangeButton } from '@/components/shared/OrangeButton';
 import { useAuthModal } from '../auth/AuthModalProvider';
 import { useHeaderContent } from './header-context';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useLocalization } from '@/lib/use-localization';
 
 export function GlobalHeader() {
+	const { t } = useLocalization();
 	const { user, isLoading: authLoading } = useAuth();
 	const { showAuthModal } = useAuthModal();
 	const { isMobile } = useSidebar();
@@ -60,7 +63,7 @@ export function GlobalHeader() {
 									}
 									disabled={!hasChangeLogs}
 									className={`flex max-w-full items-center gap-2 rounded-full border border-brand/40 bg-bg-4/80 px-3 py-1.5 text-xs text-text-primary shadow-sm backdrop-blur hover:bg-brand/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 dark:border-brand/30 dark:bg-kumo-elevated/80 md:text-sm${!hasChangeLogs ? ' opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
-									aria-label="Platform updates"
+									aria-label={t('platformUpdates')}
 								>
 									<AlertCircle className="h-4 w-4 text-kumo-brand" />
 									<span className="truncate max-w-[46ch] md:max-w-[60ch]">
@@ -73,13 +76,14 @@ export function GlobalHeader() {
 
 					<div className="flex items-center justify-end gap-1.5 shrink-0">
 						{content?.trailing}
+						<LanguageSwitcher />
 						{!authLoading && !user && (
 							<OrangeButton
 								size="sm"
 								onClick={() => showAuthModal()}
 								icon={<SignInIcon className="size-4" />}
 							>
-								Sign In
+								{t('signIn')}
 							</OrangeButton>
 						)}
 					</div>
@@ -90,7 +94,7 @@ export function GlobalHeader() {
 				{hasChangeLogs && (
 					<DialogContent className="max-w-xl">
 						<DialogHeader>
-							<DialogTitle>Platform updates</DialogTitle>
+							<DialogTitle>{t('platformUpdates')}</DialogTitle>
 							{status.globalUserMessage && (
 								<DialogDescription className="text-sm text-muted-foreground">
 									{status.globalUserMessage}

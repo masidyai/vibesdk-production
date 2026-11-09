@@ -1,13 +1,15 @@
 import { Link } from 'react-router';
-
-const links = [
-	{ to: '/about', label: 'About' },
-	{ to: '/pricing', label: 'Pricing' },
-	{ to: '/privacy', label: 'Privacy Policy' },
-	{ to: '/terms', label: 'Terms of Service' },
-];
+import { useLocalization } from '@/lib/use-localization';
 
 export function MarketingFooter() {
+	const { t } = useLocalization();
+	const links = [
+		{ to: '/about', label: t('footerAbout') },
+		{ to: '/pricing', label: t('footerPricing') },
+		{ to: '/privacy', label: t('footerPrivacy') },
+		{ to: '/terms', label: t('footerTerms') },
+	];
+
 	return (
 		<footer className="w-full border-t border-kumo-line px-5 py-7">
 			<div className="mx-auto flex max-w-6xl flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
@@ -29,7 +31,7 @@ export function MarketingFooter() {
 					))}
 				</nav>
 				<span className="text-xs text-kumo-subtle">
-					Ideas into apps, made real.
+					{t('footerSlogan')}
 				</span>
 			</div>
 		</footer>

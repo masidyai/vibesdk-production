@@ -21,6 +21,7 @@ import {
 	XIcon,
 } from '@phosphor-icons/react';
 import { OrangeButton } from '../shared/OrangeButton';
+import { useLocalization } from '@/lib/use-localization';
 
 interface LoginModalProps {
 	isOpen: boolean;
@@ -65,6 +66,7 @@ export function LoginModal({
 	actionContext,
 	showCloseButton = true,
 }: LoginModalProps) {
+	const { t } = useLocalization();
 	const { authProviders, hasOAuth } = useAuth();
 	const [forgotSent, setForgotSent] = useState(false);
 	const [forgotLoading, setForgotLoading] = useState(false);
@@ -527,23 +529,23 @@ export function LoginModal({
 					)}
 
 					<p className="text-center text-xs text-kumo-subtle">
-						By continuing, you agree to our{' '}
+						{t('authConsentPrefix')}{' '}
 						<a
 							href="https://masidy.dev/terms"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline hover:text-kumo-default"
 						>
-							Terms of Service
+							{t('authTerms')}
 						</a>{' '}
-						and{' '}
+						{t('authConsentAnd')}{' '}
 						<a
 							href="https://masidy.dev/privacy"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline hover:text-kumo-default"
 						>
-							Privacy Policy
+							{t('authPrivacy')}
 						</a>
 					</p>
 				</div>

@@ -1,55 +1,58 @@
 import { ArrowRight, Code2, Rocket, Sparkles } from 'lucide-react';
 import { Link } from 'react-router';
 import { MarketingFooter } from '@/components/marketing-footer';
+import { useLocalization } from '@/lib/use-localization';
+import type { MessageKey } from '@/lib/localization';
 
 const steps = [
 	{
 		icon: Sparkles,
-		title: 'Start with your idea',
-		description:
-			'Describe the app you want in plain language. Begin with a rough thought and add detail as you go.',
+		title: 'aboutStartTitle',
+		description: 'aboutStartDescription',
 	},
 	{
 		icon: Code2,
-		title: 'Build it together',
-		description:
-			'Masidy turns your prompt into a working app. Keep refining the result through a conversation.',
+		title: 'aboutBuildTitle',
+		description: 'aboutBuildDescription',
 	},
 	{
 		icon: Rocket,
-		title: 'Share when you’re ready',
-		description:
-			'Preview your work, make changes, and deploy when it is ready to go live.',
+		title: 'aboutShareTitle',
+		description: 'aboutShareDescription',
 	},
-];
+] as const satisfies readonly {
+	icon: typeof Sparkles;
+	title: MessageKey;
+	description: MessageKey;
+}[];
 
 export default function AboutPage() {
+	const { t } = useLocalization();
+
 	return (
 		<div className="min-h-full bg-kumo-canvas">
-			<title>About Masidy</title>
+			<title>{t('aboutEyebrow')}</title>
 			<main className="mx-auto max-w-5xl px-5 py-16 sm:px-8 sm:py-24">
 				<header className="mx-auto max-w-3xl text-center">
 					<p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-kumo-brand">
-						About Masidy
+						{t('aboutEyebrow')}
 					</p>
 					<h1 className="text-4xl font-semibold tracking-tight text-kumo-strong sm:text-6xl">
-						Make the app you’ve been imagining.
+						{t('aboutTitle')}
 					</h1>
 					<p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-kumo-subtle sm:text-lg">
-						Masidy helps turn ideas into working web apps. Describe what
-						you want to create, shape it with AI, and bring it to life
-						without starting from a blank page.
+						{t('aboutDescription')}
 					</p>
 					<Link
 						to="/"
 						className="mt-8 inline-flex items-center gap-2 rounded-lg bg-brand px-5 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90"
 					>
-						Start creating
+						{t('startCreating')}
 						<ArrowRight aria-hidden="true" className="size-4" />
 					</Link>
 				</header>
 
-				<section aria-label="How Masidy works" className="mt-20 sm:mt-28">
+				<section aria-label={t('aboutHowLabel')} className="mt-20 sm:mt-28">
 					<div className="grid gap-4 md:grid-cols-3">
 						{steps.map(({ icon: Icon, title, description }, index) => (
 							<article
@@ -60,13 +63,13 @@ export default function AboutPage() {
 									<Icon aria-hidden="true" className="size-5" />
 								</div>
 								<p className="text-xs font-medium uppercase tracking-wider text-kumo-subtle">
-									Step 0{index + 1}
+									{t('aboutStep')} 0{index + 1}
 								</p>
 								<h2 className="mt-2 text-xl font-semibold text-kumo-strong">
-									{title}
+									{t(title)}
 								</h2>
 								<p className="mt-3 text-sm leading-6 text-kumo-subtle">
-									{description}
+									{t(description)}
 								</p>
 							</article>
 						))}
@@ -75,11 +78,10 @@ export default function AboutPage() {
 
 				<section className="mx-auto mt-16 max-w-2xl text-center sm:mt-24">
 					<h2 className="text-2xl font-semibold tracking-tight text-kumo-strong sm:text-3xl">
-						Your idea is a good place to start.
+						{t('aboutClosingTitle')}
 					</h2>
 					<p className="mt-3 text-sm leading-6 text-kumo-subtle">
-						No perfect brief required. Start small, see what takes shape,
-						and keep building from there.
+						{t('aboutClosingDescription')}
 					</p>
 				</section>
 			</main>

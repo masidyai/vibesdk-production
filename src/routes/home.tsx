@@ -41,9 +41,12 @@ import { PromptBox } from '@/components/prompt-box';
 import { InfoIcon, PaperPlaneTiltIcon } from '@phosphor-icons/react';
 import { startCloudflareConnect } from '@/lib/cloudflare-connect';
 import { MarketingFooter } from '@/components/marketing-footer';
+import { useLocalization } from '@/lib/use-localization';
+import type { MessageKey } from '@/lib/localization';
 
 export default function Home() {
 	const navigate = useNavigate();
+	const { t } = useLocalization();
 	const { requireAuth } = useAuthGuard();
 	const [projectMode, setProjectMode] = useState<ProjectType>('app');
 	const behaviorMode: Extract<BehaviorType, 'think' | 'phasic'> = 'think';
@@ -121,8 +124,15 @@ export default function Home() {
 	});
 
 	const placeholderPhrases = useMemo(
-		() => ['todo list app', 'SaaS landing page', 'AI recipe generator', 'expense tracker', 'booking system', 'portfolio site'],
-		[],
+		() => [
+			t('placeholderPortfolio'),
+			t('placeholderDashboard'),
+			t('placeholderStore'),
+			t('placeholderRecipe'),
+			t('placeholderExpense'),
+			t('placeholderBooking'),
+		],
+		[t],
 	);
 
 	const { apps } = usePaginatedApps({
@@ -133,21 +143,18 @@ export default function Home() {
 	});
 
 	const discoverApps = useMemo(() => (apps ?? []).slice(0, 9), [apps]);
-	const starterIdeas = [
+	const starterIdeas: { category: MessageKey; prompt: MessageKey }[] = [
 		{
-			category: 'E-commerce',
-			prompt:
-				'Build a warm, modern storefront for a handmade ceramics brand with a product grid and an about page.',
+			category: 'ideaEcommerce',
+			prompt: 'ideaEcommercePrompt',
 		},
 		{
-			category: 'Dashboard',
-			prompt:
-				'Create a polished project dashboard with a sidebar, task overview, and progress charts.',
+			category: 'ideaDashboard',
+			prompt: 'ideaDashboardPrompt',
 		},
 		{
-			category: 'Portfolio',
-			prompt:
-				'Design a bold portfolio website for a creative studio with a project gallery and contact section.',
+			category: 'ideaPortfolio',
+			prompt: 'ideaPortfolioPrompt',
 		},
 	];
 
@@ -229,22 +236,21 @@ export default function Home() {
 					<div className="home-hero__copy">
 						<div className="home-eyebrow">
 							<Sparkles aria-hidden="true" />
-							<span>Your idea, made real</span>
+							<span>{t('homeEyebrow')}</span>
 						</div>
 						<h1>
-							Your idea.{' '}
-							<span>Made real.</span>
+							{t('homeTitle')}{' '}
+							<span>{t('homeTitleAccent')}</span>
 						</h1>
 						<p className="home-hero__description">
-							Describe what you want to make. Masidy builds your app
-							and gets it ready to share.
+							{t('homeDescription')}
 						</p>
 						<div ref={promptRef} className="home-prompt">
 							<PromptBox
 								value={query}
 								onChange={setQuery}
 								onSubmit={() => handleCreateApp(query, projectMode)}
-								placeholder="Create a "
+								placeholder={t('promptPlaceholder')}
 								animatedPlaceholder
 								placeholderPhrases={placeholderPhrases}
 								images={images}
@@ -278,21 +284,21 @@ export default function Home() {
 								}
 							/>
 							<div className="home-prompt__footnote">
-								<span><Check aria-hidden="true" /> Free to start</span>
-								<span>No credit card</span>
-								<span>Deploy when you’re ready</span>
+								<span><Check aria-hidden="true" /> {t('freeToStart')}</span>
+								<span>{t('noCreditCard')}</span>
+								<span>{t('deployWhenReady')}</span>
 							</div>
 						</div>
-						<div className="home-ideas" aria-label="Starter ideas">
-							<span>NEED A STARTING POINT?</span>
+						<div className="home-ideas" aria-label={t('startingPoint')}>
+							<span>{t('startingPoint')}</span>
 							<div>
 								{starterIdeas.map((idea) => (
 									<button
 										key={idea.category}
 										type="button"
-										onClick={() => setQuery(idea.prompt)}
+										onClick={() => setQuery(t(idea.prompt))}
 									>
-										{idea.category}
+										{t(idea.category)}
 										<ArrowUpRight aria-hidden="true" />
 									</button>
 								))}
@@ -320,12 +326,9 @@ export default function Home() {
 								/>
 								<p className="text-xs text-kumo-subtle leading-relaxed">
 									<span className="font-medium text-text-secondary">
-										Images Beta:
-									</span>{' '}
-									Images guide app layout and design but may
-									not be replicated exactly. The coding agent
-									cannot access images directly for app
-									assets.
+										{t('imagesBeta')}
+										</span>{' '}
+										{t('imagesHelp')}
 								</p>
 							</div>
 						</motion.div>
@@ -340,28 +343,28 @@ export default function Home() {
 					transition={{ duration: 0.75, ease: [0.2, 0.75, 0.2, 1] }}
 				>
 					<div className="home-section-heading">
-						<span>FROM IDEA TO LIVE</span>
-						<h2>Less setup. More <em>making.</em></h2>
-						<p>Go from a rough thought to something you can actually use.</p>
+						<span>{t('journeyEyebrow')}</span>
+						<h2>{t('journeyTitle')} <em>{t('journeyAccent')}</em></h2>
+						<p>{t('journeyDescription')}</p>
 					</div>
 					<div className="home-steps">
 						<article>
 							<div className="home-step-icon"><Sparkles aria-hidden="true" /></div>
-							<span>01 / DESCRIBE</span>
-							<h3>Start with a sentence.</h3>
-							<p>Tell Masidy what you have in mind. Add a reference image if you have one.</p>
+							<span>{t('stepDescribe')}</span>
+							<h3>{t('stepDescribeTitle')}</h3>
+							<p>{t('stepDescribeDescription')}</p>
 						</article>
 						<article>
 							<div className="home-step-icon"><Code2 aria-hidden="true" /></div>
-							<span>02 / BUILD</span>
-							<h3>Shape it as you go.</h3>
-							<p>Watch your idea take form, then ask for changes until it feels right.</p>
+							<span>{t('stepBuild')}</span>
+							<h3>{t('stepBuildTitle')}</h3>
+							<p>{t('stepBuildDescription')}</p>
 						</article>
 						<article>
 							<div className="home-step-icon"><Globe2 aria-hidden="true" /></div>
-							<span>03 / SHARE</span>
-							<h3>Put it out there.</h3>
-							<p>Deploy your finished project and share it with the world.</p>
+							<span>{t('stepShare')}</span>
+							<h3>{t('stepShareTitle')}</h3>
+							<p>{t('stepShareDescription')}</p>
 						</article>
 					</div>
 				</motion.section>
@@ -376,13 +379,13 @@ export default function Home() {
 					>
 						<div className="home-showcase__heading">
 							<div className="home-section-heading">
-								<span>MADE WITH MASIDY</span>
-								<h2>Good ideas look <em>good.</em></h2>
-								<p>Explore what people are creating—or use these ideas to start your own.</p>
+								<span>{t('showcaseEyebrow')}</span>
+								<h2>{t('showcaseTitle')} <em>{t('showcaseAccent')}</em></h2>
+								<p>{t('showcaseDescription')}</p>
 							</div>
 							<div>
 								<LinkButton variant="outline" size="sm" href="/discover">
-									Explore projects
+									{t('exploreProjects')}
 									<ArrowUpRight className="size-3.5 opacity-70" />
 								</LinkButton>
 							</div>
@@ -416,15 +419,15 @@ export default function Home() {
 					transition={{ duration: 0.7, ease: [0.2, 0.75, 0.2, 1] }}
 				>
 					<div>
-						<span><Rocket aria-hidden="true" /> YOUR NEXT PROJECT STARTS HERE</span>
-						<h2>Make something<br /><em>you’re proud of.</em></h2>
-						<p>No blank canvas required. Just bring the idea.</p>
+						<span><Rocket aria-hidden="true" /> {t('ctaEyebrow')}</span>
+						<h2>{t('ctaTitle')}<br /><em>{t('ctaAccent')}</em></h2>
+						<p>{t('ctaDescription')}</p>
 					</div>
 					<button
 						type="button"
 						onClick={focusPrompt}
 					>
-						Start creating <ArrowRight aria-hidden="true" />
+						{t('startCreating')} <ArrowRight aria-hidden="true" />
 					</button>
 				</motion.section>
 			</LayoutGroup>

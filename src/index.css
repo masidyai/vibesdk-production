@@ -1671,6 +1671,10 @@
 	transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
+[dir='rtl'] .home-idea-card {
+	text-align: right;
+}
+
 .home-idea-card:hover {
 	transform: translateY(-4px);
 	box-shadow: 0 15px 30px rgba(34, 42, 24, 0.1);

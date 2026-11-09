@@ -29,6 +29,7 @@ import { useUsageLimitsBadgeState } from '@/components/usage-limits-badge';
 import { useLimitsContext } from '@/contexts/limits-context';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { startCloudflareConnect } from '@/lib/cloudflare-connect';
+import { useLocalization } from '@/lib/use-localization';
 
 interface App {
 	id: string;
@@ -71,6 +72,7 @@ function AppMenuItem({
 	getVisibilityIcon,
 	appPath,
 }: AppMenuItemProps) {
+	const { locale, t } = useLocalization();
 	const formatTimestamp = () => {
 		const updatedAt =
 			app.updatedAt instanceof Date
@@ -83,22 +85,43 @@ function AppMenuItem({
 			const diffInSeconds = Math.floor(
 				(Date.now() - updatedAt.getTime()) / 1000,
 			);
+			const relativeTime = new Intl.RelativeTimeFormat(locale, {
+				numeric: 'auto',
+			});
 
-			if (diffInSeconds < 60) return 'now';
+			if (diffInSeconds < 60) return relativeTime.format(0, 'second');
 			if (diffInSeconds < 3600)
-				return `${Math.floor(diffInSeconds / 60)}m ago`;
+				return relativeTime.format(
+					-Math.floor(diffInSeconds / 60),
+					'minute',
+				);
 			if (diffInSeconds < 86400)
-				return `${Math.floor(diffInSeconds / 3600)}h ago`;
+				return relativeTime.format(
+					-Math.floor(diffInSeconds / 3600),
+					'hour',
+				);
 			if (diffInSeconds < 604800)
-				return `${Math.floor(diffInSeconds / 86400)}d ago`;
+				return relativeTime.format(
+					-Math.floor(diffInSeconds / 86400),
+					'day',
+				);
 			if (diffInSeconds < 2592000)
-				return `${Math.floor(diffInSeconds / 604800)}w ago`;
+				return relativeTime.format(
+					-Math.floor(diffInSeconds / 604800),
+					'week',
+				);
 			if (diffInSeconds < 31536000)
-				return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
-			return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+				return relativeTime.format(
+					-Math.floor(diffInSeconds / 2592000),
+					'month',
+				);
+			return relativeTime.format(
+				-Math.floor(diffInSeconds / 31536000),
+				'year',
+			);
 		}
 		if (app.updatedAtFormatted) return app.updatedAtFormatted;
-		return 'Recently';
+		return t('recently');
 	};
 
 	return (
@@ -149,6 +172,7 @@ function AppMenuItem({
 }
 
 export function AppSidebar() {
+	const { t } = useLocalization();
 	const { user } = useAuth();
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
@@ -166,8 +190,8 @@ export function AppSidebar() {
 		!usageLimits.loading &&
 		(!usageLimits.hasUserToken || usageLimits.needsConfiguration);
 	const cloudflareCtaLabel = usageLimits.needsConfiguration
-		? 'Configure AI Gateway'
-		: 'Connect Cloudflare';
+		? t('configureAiGateway')
+		: t('connectCloudflare');
 
 	const handleCloudflareCta = () => {
 		if (usageLimits.needsConfiguration) {
@@ -230,14 +254,14 @@ export function AppSidebar() {
 	const showAppsSection =
 		isSearching || appsWithoutBookmarks.length > 0 || moreAvailable;
 
-	const bookmarkSearchEmptyMessage = `No bookmarks found for "${trimmedSearchQuery}"`;
+	const bookmarkSearchEmptyMessage = `${t('noBookmarksFound')} "${trimmedSearchQuery}"`;
 
 	const appSearchEmptyMessage =
 		allApps.length === 0
-			? 'No apps yet'
+			? t('noAppsYet')
 			: favoriteSearchResults.length > 0
-				? `No other apps found for "${trimmedSearchQuery}"`
-				: `No apps found for "${trimmedSearchQuery}"`;
+				? `${t('noOtherAppsFound')} "${trimmedSearchQuery}"`
+				: `${t('noAppsFound')} "${trimmedSearchQuery}"`;
 
 	const getVisibilityIcon = (visibility: App['visibility']) => {
 		switch (visibility) {
@@ -268,7 +292,7 @@ export function AppSidebar() {
 					<div className="relative flex size-9 items-center justify-center">
 						<MasidyLogo className="size-7 shrink-0 transition-opacity group-hover/sidebar:opacity-0 group-focus-within/sidebar:opacity-0" />
 						<Sidebar.Trigger
-							aria-label="Open sidebar"
+							aria-label={t('toggleSidebar')}
 							className="absolute inset-0 flex size-9 items-center justify-center opacity-0 transition-opacity group-hover/sidebar:opacity-100 group-focus-within/sidebar:opacity-100"
 						/>
 					</div>
@@ -284,7 +308,7 @@ export function AppSidebar() {
 							</span>
 						</Link>
 						<Sidebar.Trigger
-							aria-label="Collapse sidebar"
+							aria-label={t('toggleSidebar')}
 							className="ml-auto shrink-0"
 						/>
 					</div>
@@ -297,8 +321,8 @@ export function AppSidebar() {
 						{pathname !== '/' && (
 							<OrangeButton
 								shape="square"
-								aria-label="New app"
-								title="New app"
+								aria-label={t('newApp')}
+								title={t('newApp')}
 								onClick={() => navigate('/')}
 								className="size-8!"
 								icon={
@@ -314,8 +338,8 @@ export function AppSidebar() {
 							size="base"
 							variant="ghost"
 							id="discover-link"
-							aria-label="Discover"
-							title="Discover"
+							aria-label={t('discover')}
+							title={t('discover')}
 							aria-current={
 								pathname === '/discover' ? 'page' : undefined
 							}
@@ -339,13 +363,13 @@ export function AppSidebar() {
 											weight="bold"
 										/>
 									}
-									title="New app"
+									title={t('newApp')}
 									onClick={() => {
 										navigate('/');
 									}}
 									className="h-8! w-full justify-start text-sm"
 								>
-									New app
+									{t('newApp')}
 								</OrangeButton>
 							)}
 
@@ -358,10 +382,10 @@ export function AppSidebar() {
 									/>
 								}
 								id="discover-link"
-								tooltip="Discover"
+								tooltip={t('discover')}
 								onClick={() => navigate('/discover')}
 							>
-								Discover
+								{t('discover')}
 							</Sidebar.MenuButton>
 						</Sidebar.Menu>
 
@@ -372,8 +396,8 @@ export function AppSidebar() {
 										<MagnifyingGlassIcon className="size-4 text-kumo-subtle" />
 									</InputGroup.Addon>
 									<InputGroup.Input
-										aria-label="Search apps"
-										placeholder="Search apps"
+										aria-label={t('searchApps')}
+										placeholder={t('searchApps')}
 										value={searchQuery}
 										onChange={(event) =>
 											setSearchQuery(event.target.value)
@@ -391,7 +415,7 @@ export function AppSidebar() {
 					<Sidebar.Group>
 						<Sidebar.GroupLabel>
 							<span className="text-xs font-funky-mono">
-								Bookmarked
+								{t('bookmarked')}
 							</span>
 						</Sidebar.GroupLabel>
 						<Sidebar.Menu>
@@ -399,7 +423,7 @@ export function AppSidebar() {
 								favoriteAppsLoading ? (
 									<Sidebar.MenuItem>
 										<div className="px-3 py-3 text-sm text-kumo-subtle">
-											Searching bookmarks...
+											{t('searchingBookmarks')}
 										</div>
 									</Sidebar.MenuItem>
 								) : favoriteSearchResults.length > 0 ? (
@@ -452,7 +476,7 @@ export function AppSidebar() {
 					<Sidebar.Group>
 						<Sidebar.GroupLabel>
 							<span className="text-xs font-funky-mono">
-								Apps
+								{t('apps')}
 							</span>
 						</Sidebar.GroupLabel>
 						<Sidebar.Menu>
@@ -460,7 +484,7 @@ export function AppSidebar() {
 								allAppsLoading ? (
 									<Sidebar.MenuItem>
 										<div className="px-3 py-3 text-sm text-kumo-subtle">
-											Searching apps...
+											{t('searchingApps')}
 										</div>
 									</Sidebar.MenuItem>
 								) : appSearchResults.length > 0 ? (
@@ -511,10 +535,10 @@ export function AppSidebar() {
 										<Sidebar.MenuButton
 											active={pathname === '/apps'}
 											icon={CaretRightIcon}
-											tooltip="View all apps"
+											tooltip={t('viewAllApps')}
 											onClick={() => navigate('/apps')}
 										>
-											View all apps
+											{t('viewAllApps')}
 										</Sidebar.MenuButton>
 									)}
 								</>
@@ -535,7 +559,7 @@ export function AppSidebar() {
 												<Sidebar.MenuButton
 													icon={UsersThreeIcon}
 												>
-													My boards
+													{t('myBoards')}
 													<Sidebar.MenuChevron />
 												</Sidebar.MenuButton>
 											}
@@ -571,7 +595,7 @@ export function AppSidebar() {
 														navigate('/boards')
 													}
 												>
-													Browse all boards
+													{t('browseAllBoards')}
 												</Sidebar.MenuSubButton>
 											</Sidebar.MenuSub>
 										</Sidebar.CollapsibleContent>
@@ -609,7 +633,7 @@ export function AppSidebar() {
 					)}
 					{buildUsage && !isCollapsed && (
 						<div className="flex items-center justify-between text-xs text-kumo-subtle px-1">
-							<span>Builds this month</span>
+							<span>{t('buildsThisMonth')}</span>
 							<span className="font-mono font-medium text-kumo-default">
 								{buildUsage.buildsLimit >= 999999
 									? `${buildUsage.buildsUsed}`
