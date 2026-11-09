@@ -401,6 +401,10 @@
 	margin-inline: auto;
 }
 
+.home-prompt__input textarea {
+	text-align: center;
+}
+
 .home-prompt > div:first-child {
 	filter: drop-shadow(0 15px 32px rgba(27, 38, 13, 0.09));
 }
