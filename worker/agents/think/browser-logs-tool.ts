@@ -2,7 +2,8 @@
  * `get_browser_console_logs` — opens the
  * current preview app in a real headless browser (Cloudflare `BROWSER` binding
  * in prod, local sidecar in dev) and returns console output, uncaught page
- * errors, and failed network requests captured during page load.
+ * errors, failed network requests, and frontend stylesheet/computed-style
+ * diagnostics captured after page load.
  *
  * This runs inside the ThinkAgent DO and calls the shared capture service directly via
  * `getBrowserCaptureClient` — the parent agent is busy awaiting the Think
@@ -14,13 +15,14 @@ import { getBrowserCaptureClient } from '../../services/browser-capture/factory'
 import { createLogger } from '../../logger';
 
 const DESCRIPTION = [
-	'Open the current preview app in a real headless browser and return its console output, uncaught page errors, and failed network requests captured during page load.',
+	'Open the current preview app in a real headless browser and return its console output, uncaught page errors, failed network requests, and frontend stylesheet/computed-style diagnostics.',
 	'',
 	"USE THIS FOR client-side bugs invisible to server-side logs: React render/hydration errors, broken client-side fetches, missing assets (4xx/5xx), CSP/CORS violations, JS exceptions in handlers.",
+	'Use frontend_inspection to confirm that stylesheets actually loaded and contain CSS rules, and to inspect the app root and primary heading computed styles. Treat style_warnings as issues to investigate; a clean console alone does not mean the page is styled.',
 	'',
 	"DEFAULTS to the current preview URL. Pass 'url' to inspect a specific route. Pass 'wait_seconds' (default 5, max 25) to allow late-firing logs/network calls after page load. Optional 'interact_script' is a JS string evaluated in the page after load (e.g. 'document.querySelector(\"button\").click()') to trigger interactions before logs are collected.",
 	'',
-	"OUTPUT is JSON: { url, captured_at, logs:[{level,text,location}], page_errors:[{message,stack}], request_failures:[{url,failure,status}], truncated, totals, warning? }. If 'warning' is set in dev, the browser sidecar wasn't reachable — instruct the user to run 'npm run dev:browser' and retry. Each category is independently capped at max_lines (default 100, -1 = no limit).",
+	"OUTPUT is JSON: { url, captured_at, logs:[{level,text,location}], page_errors:[{message,stack}], request_failures:[{url,failure,status}], frontend_inspection:{stylesheetCount,stylesheets,appRoot,primaryHeading,visibleButtonCount,styleWarnings}, truncated, totals, warning? }. If 'warning' is set in dev, the browser sidecar wasn't reachable — instruct the user to run 'npm run dev:browser' and retry. Each log category is independently capped at max_lines (default 100, -1 = no limit).",
 ].join('\n');
 
 export function createBrowserConsoleLogsTool(opts: { env: Env; defaultUrl?: string }): Tool {
@@ -92,6 +94,9 @@ export function createBrowserConsoleLogsTool(opts: { env: Env; defaultUrl?: stri
 					logs: trunc(result.logs),
 					page_errors: trunc(result.pageErrors),
 					request_failures: trunc(result.requestFailures),
+					...(result.frontendInspection
+						? { frontend_inspection: result.frontendInspection }
+						: {}),
 					truncated,
 					totals: {
 						logs: result.logs.length,

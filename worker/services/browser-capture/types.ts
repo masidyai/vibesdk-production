@@ -51,12 +51,40 @@ export interface BrowserConsoleCaptureResult {
 	logs: BrowserConsoleEntry[];
 	pageErrors: BrowserConsolePageError[];
 	requestFailures: BrowserConsoleRequestFailure[];
+	frontendInspection?: BrowserFrontendInspection;
 	/**
 	 * Populated when the dev sidecar is unavailable. The tool returns
 	 * the result intact so the LLM sees the warning and moves on
 	 * instead of being thrown a hard error.
 	 */
 	warning?: string;
+}
+
+export interface BrowserFrontendInspection {
+	title: string;
+	readyState: string;
+	stylesheetCount: number;
+	stylesheets: {
+		href: string | null;
+		loaded: boolean;
+		ruleCount: number | null;
+	}[];
+	appRoot: {
+		tagName: string;
+		display: string;
+		fontFamily: string;
+		fontSize: string;
+		color: string;
+		backgroundColor: string;
+	} | null;
+	primaryHeading: {
+		fontSize: string;
+		fontWeight: string;
+		color: string;
+		margin: string;
+	} | null;
+	visibleButtonCount: number;
+	styleWarnings: string[];
 }
 
 /**

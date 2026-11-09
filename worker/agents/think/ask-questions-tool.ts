@@ -13,11 +13,11 @@ import { tool, type Tool } from 'ai';
 import { z } from 'zod';
 
 const DESCRIPTION = [
-	'Ask the user one or more clarifying questions when the request is underspecified or ambiguous.',
+	'Ask only when essential information cannot be reasonably inferred and blocks safe or useful progress. Do not ask merely because a request is brief or leaves ordinary product, visual, or technical choices open.',
 	'',
 	'Each question can provide predefined answer options, allow multiple selections, and/or allow a free-text custom answer. The user can also skip the popup entirely.',
 	'',
-	'Call this tool once with all the questions you need answered, then end your turn and wait for the user. Do not write or edit files until the scope is clear or the user tells you to proceed with your assumptions.',
+	'If a question is truly blocking, ask only the minimum needed. Continue with any independent implementation that is not blocked; do not pause for approval of a reasonable plan.',
 ].join('\n');
 
 export type ClarifyingQuestion = {

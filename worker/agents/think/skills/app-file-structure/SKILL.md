@@ -39,6 +39,13 @@ A typical full-stack space project:
 
 A static-only SPA can skip `src/` entirely — just `wrangler.json` + `public/` is enough as long as `main` points to a minimal pass-through worker or you accept that all requests fall through assets.
 
+## Frontend styling and verification
+
+- A browser UI is not complete when it only renders semantic HTML. Implement the stylesheet or framework styles and connect them to the active page entry.
+- For static apps, place CSS under the configured assets directory (typically `public/`) and link it from HTML with a root-relative path such as `<link rel="stylesheet" href="/style.css">`. Do not use `/public/style.css`.
+- For bundled apps, import CSS from the JavaScript/TypeScript entry point that is actually loaded by the page. Confirm that the selectors target elements present in the rendered DOM.
+- After deployment, use `get_browser_console_logs` and inspect `frontend_inspection`: stylesheet links should be loaded and contain rules, and the reported computed styles should reflect the intended UI. Fix missing assets, ineffective selectors, or other style warnings and redeploy. A successful build or clean JavaScript console is not proof that styling works.
+
 ## Wrangler config
 
 Minimum viable `wrangler.json`:
