@@ -9,6 +9,7 @@ import AppsPage from './routes/apps';
 import AppView from './routes/app';
 import DiscoverPage from './routes/discover';
 import PricingPage from './routes/pricing';
+import AboutPage from './routes/about';
 import TermsPage from './routes/terms';
 import PrivacyPage from './routes/privacy';
 import ResetPasswordPage from './routes/reset-password';
@@ -37,6 +38,7 @@ element: (<ProtectedRoute><AppsPage /></ProtectedRoute>),
 { path: 'app/:id', Component: AppView },
 { path: 'discover', Component: DiscoverPage },
 { path: 'pricing', Component: PricingPage },
+{ path: 'about', Component: AboutPage },
 { path: 'terms', Component: TermsPage },
 { path: 'privacy', Component: PrivacyPage },
 { path: 'reset-password', Component: ResetPasswordPage },

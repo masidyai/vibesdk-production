@@ -1,4 +1,6 @@
-﻿export default function PrivacyPage() {
+﻿import { MarketingFooter } from '@/components/marketing-footer';
+
+export default function PrivacyPage() {
 return (
 <div className="min-h-screen bg-kumo-canvas">
 <title>Privacy Policy - Masidy</title>
@@ -121,6 +123,7 @@ privacy@masidy.dev
 </section>
 </div>
 </main>
+<MarketingFooter />
 </div>
 );
 }

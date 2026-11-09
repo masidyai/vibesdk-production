@@ -40,6 +40,7 @@ import { checkCanSendPrompt } from '@/utils/usage-limit-checker';
 import { PromptBox } from '@/components/prompt-box';
 import { InfoIcon, PaperPlaneTiltIcon } from '@phosphor-icons/react';
 import { startCloudflareConnect } from '@/lib/cloudflare-connect';
+import { MarketingFooter } from '@/components/marketing-footer';
 
 export default function Home() {
 	const navigate = useNavigate();
@@ -428,6 +429,8 @@ export default function Home() {
 					</button>
 				</motion.section>
 			</LayoutGroup>
+
+			<MarketingFooter />
 
 			{/* Usage limit dialogs */}
 			{showLimitDialog}

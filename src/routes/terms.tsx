@@ -1,4 +1,6 @@
-﻿export default function TermsPage() {
+﻿import { MarketingFooter } from '@/components/marketing-footer';
+
+export default function TermsPage() {
 return (
 <div className="min-h-screen bg-kumo-canvas">
 <title>Terms of Service - Masidy</title>
@@ -111,6 +113,7 @@ legal@masidy.dev
 </section>
 </div>
 </main>
+<MarketingFooter />
 </div>
 );
 }

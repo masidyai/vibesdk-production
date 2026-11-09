@@ -5,6 +5,7 @@ import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import { Check, Zap } from 'lucide-react';
+import { MarketingFooter } from '@/components/marketing-footer';
 
 const PLANS = [
     {
@@ -187,6 +188,7 @@ export default function PricingPage() {
                     ))}
                 </div>
             </main>
+            <MarketingFooter />
         </div>
     );
 }
